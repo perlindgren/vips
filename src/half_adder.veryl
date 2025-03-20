@@ -10,7 +10,7 @@ module HalfAdder #() (
     }
 }
 
-#[test(adder)]
+#[test(half_adder)]
 embed (inline) sv{{{
     module test;
         logic a;
@@ -22,6 +22,7 @@ embed (inline) sv{{{
         initial begin
             a = 0; b = 0;
             assert (sum == 0 && carry == 0) else $error("0+0");
+            #10;
 
             a = 1; b = 0;
             #10;

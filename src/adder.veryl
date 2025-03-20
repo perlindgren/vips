@@ -1,0 +1,48 @@
+module Adder #() (
+    a    : input  logic<4>,
+    b    : input  logic<4>,
+    sum  : output logic<4>,
+    carry: output logic   ,
+) {
+    var c: logic<5>;
+
+    assign c[0]  = 0;
+    assign carry = c[4];
+
+    for i in 0..4 :label {
+        inst full_adder: FullAdder (
+            a    : a[i]    ,
+            b    : b[i]    ,
+            c    : c[i]    ,
+            sum  : sum[i]  ,
+            carry: c[i + 1],
+        );
+    }
+}
+
+#[test(adder)]
+embed (inline) sv{{{
+    module test;
+        logic [3:0] a;
+        logic [3:0] b;
+        logic [3:0] sum;
+        logic carry;
+        adder_Adder adder (a, b, sum, carry);
+
+        initial begin
+            a = 0; b = 1;
+            #10;
+            assert (sum == 1 && carry == 0) else $error("0+1");
+
+            a = 2; b = 1;
+            #10;
+            assert (sum == 3 && carry == 0) else $error("2+1");
+
+            a = 8; b = 8;
+            #10;
+            assert (sum == 0 && carry == 1) else $error("8+8");
+
+            $finish;
+        end
+    endmodule
+}}}
