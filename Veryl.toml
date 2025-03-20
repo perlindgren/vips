@@ -3,4 +3,4 @@ name = "adder"
 version = "0.1.0"
 
 [build]
-#exclude_std = true
+exclude_std = true
