@@ -1,0 +1,7 @@
+/doc
+/dependencies
+*.sv
+*.map
+*.f
+*.lock
+*.vcd
