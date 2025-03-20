@@ -1,15 +1,15 @@
-module Adder #() (
-    a    : input  logic<4>,
-    b    : input  logic<4>,
-    sum  : output logic<4>,
+module Adder #(param Width: u32 = 4) (
+    a    : input  logic<Width>,
+    b    : input  logic<Width>,
+    sum  : output logic<Width>,
     carry: output logic   ,
 ) {
-    var c: logic<5>;
+    var c: logic<Width+1>;
 
     assign c[0]  = 0;
-    assign carry = c[4];
+    assign carry = c[Width];
 
-    for i in 0..4 :label {
+    for i in 0..Width :label {
         inst full_adder: FullAdder (
             a    : a[i]    ,
             b    : b[i]    ,
@@ -20,14 +20,14 @@ module Adder #() (
     }
 }
 
-#[test(adder)]
+#[test(adder4)]
 embed (inline) sv{{{
     module test;
         logic [3:0] a;
         logic [3:0] b;
         logic [3:0] sum;
         logic carry;
-        adder_Adder adder (a, b, sum, carry);
+        adder_Adder #(4) adder (a, b, sum, carry);
 
         initial begin
             a = 0; b = 1;
@@ -41,6 +41,34 @@ embed (inline) sv{{{
             a = 8; b = 8;
             #10;
             assert (sum == 0 && carry == 1) else $error("8+8");
+
+            $finish;
+        end
+    endmodule
+}}}
+
+#[test(adder32)]
+embed (inline) sv{{{
+    module test;
+        logic [31:0] a;
+        logic [31:0] b;
+        logic [31:0] sum;
+        logic carry;
+        adder_Adder #(32) adder (a, b, sum, carry);
+
+        initial begin
+            a = 0; b = 100;
+            #10;
+            assert (sum == 100 && carry == 0) else $error("0+1");
+
+            a = 200; b = 100;
+            #10;
+            assert (sum == 300 && carry == 0) else $error("2+1");
+
+            // max 32 bit integer / 2
+            a = 2147483648; b = 2147483648;
+            #10;
+            assert (sum == 0 && carry == 1) else $error("2147483648+2147483648");
 
             $finish;
         end
