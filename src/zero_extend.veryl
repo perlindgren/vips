@@ -1,0 +1,27 @@
+module ZeroExtend (
+    v: input  logic    ,
+    o: output logic<32>,
+) {
+    assign o = {1'0 repeat 31, v};
+}
+
+#[test(zero_extend)]
+embed (inline) sv{{{
+    module test;
+        logic v;
+        logic [31:0] o;
+        adder_ZeroExtend ZeroExtend (v, o );
+        
+        initial begin
+            v = 0; 
+            #10;
+            assert (o == 0) else $error("0");
+
+            v = 1; 
+            #10;
+            assert (o == 1) else $error("1");
+            
+            $finish; 
+        end
+    endmodule
+}}}

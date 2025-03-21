@@ -1,0 +1,28 @@
+// module Alu (
+//     a  : input  logic<32>,
+//     b  : input  logic<32>,
+//     sub: input  logic    ,
+//     op : input  logic<2> ,
+//     r  : output logic    ,
+//     v  : output logic    ,
+//     c  : output logic    ,
+//     z  : output logic    ,
+
+// ) {
+//     var sum: logic<32>;
+//     inst adder: Adder (
+//         a       ,
+//         b       ,
+//         sum     ,
+//         carry: c,
+//     );
+//     always_comb {
+//         case a {
+//             0      : r = a & b;
+//             1      : r = a | b;
+//             3      : r = sum;
+//             default: r = 0;
+//         }
+//     }
+// }
+

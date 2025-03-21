@@ -1,10 +1,12 @@
-module Adder #(param Width: u32 = 4) (
+module Adder #(
+    param Width: u32 = 4,
+) (
     a    : input  logic<Width>,
     b    : input  logic<Width>,
     sum  : output logic<Width>,
-    carry: output logic   ,
+    carry: output logic       ,
 ) {
-    var c: logic<Width+1>;
+    var c: logic<Width + 1>;
 
     assign c[0]  = 0;
     assign carry = c[Width];
@@ -59,11 +61,15 @@ embed (inline) sv{{{
         initial begin
             a = 0; b = 100;
             #10;
-            assert (sum == 100 && carry == 0) else $error("0+1");
+            assert (sum == 100 && carry == 0) else $error("0+100");
 
+            a = 5; b = 3;
+            #10;
+            assert (sum == 8 && carry == 0) else $error("5+3");
+            
             a = 200; b = 100;
             #10;
-            assert (sum == 300 && carry == 0) else $error("2+1");
+            assert (sum == 300 && carry == 0) else $error("200+100");
 
             // max 32 bit integer / 2
             a = 2147483648; b = 2147483648;
