@@ -1,25 +1,31 @@
 module Adder #(
     param Width: u32 = 4,
 ) (
-    a    : input  logic<Width>,
-    b    : input  logic<Width>,
-    sum  : output logic<Width>,
-    carry: output logic       ,
+    a  : input  logic<Width>,
+    b  : input  logic<Width>,
+    sum: output logic<Width>,
+    /* verilator lint_off UNOPTFLAT */
+    carry: output logic,
+    /* verilator lint_on UNOPTFLAT */
 ) {
+    /* verilator lint_off UNOPTFLAT */
     var c: logic<Width + 1>;
 
     assign c[0]  = 0;
     assign carry = c[Width];
 
     for i in 0..Width :label {
+        var cl: logic;
+        assign cl = c[i];
         inst full_adder: FullAdder (
             a    : a[i]    ,
             b    : b[i]    ,
-            c    : c[i]    ,
+            c    : cl      ,
             sum  : sum[i]  ,
             carry: c[i + 1],
         );
     }
+    /* verilator lint_on UNOPTFLAT */
 }
 
 #[test(adder4)]
@@ -66,7 +72,7 @@ embed (inline) sv{{{
             a = 5; b = 3;
             #10;
             assert (sum == 8 && carry == 0) else $error("5+3");
-            
+
             a = 200; b = 100;
             #10;
             assert (sum == 300 && carry == 0) else $error("200+100");
