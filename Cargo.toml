@@ -1,0 +1,10 @@
+[package]
+name = "veryl_adder"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+marlin = { version = "0.4.0", features = ["veryl"] }
+snafu = "0.8.5"

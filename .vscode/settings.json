@@ -3,6 +3,7 @@
         "UNOPTFLAT",
         "Veryl",
         "endmodule",
+        "nocapture",
         "verilator"
     ]
 }

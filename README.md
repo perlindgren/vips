@@ -4,11 +4,66 @@
 
 - Verilator, https://verilator.org/guide/latest/install.html
 - Veryl, https://veryl-lang.org/install/
-- Surfer, https://gitlab.com/surfer-project/surfer
+- Optional dependencies:
+  - Surfer, https://gitlab.com/surfer-project/surfer (Stand alone wave viewer)
+  - Merlin, https://www.ethanuppal.com/marlin/ (used as a Rust library)
 
-## Test & simulation 
+## Veryl Test & Simulation
 
 ```shell
 veryl test --wave
 surfer src/<module.vcd>
+```
+
+## Merlin Test
+
+This allows us to use the rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
+
+```sv
+// src/alu.veryl
+module Alu (
+    a  : input  logic<32>,
+    b  : input  logic<32>,
+    sub: input  logic    ,
+    op : input  logic<2> ,
+    r  : output logic<32>,
+    v  : output logic    ,
+    c  : output logic    ,
+    z  : output logic    ,
+)
+```
+
+```rust
+// tests/veryl_tests.rs
+...
+#[veryl(src = "src/alu.veryl", name = "Alu")]
+pub struct Alu;
+
+#[test]
+#[snafu::report]
+fn test_alu() -> Result<(), Whatever> {
+    ...
+
+    let runtime = VerylRuntime::new(VerylRuntimeOptions {
+        call_veryl_build: true, /* warning: not thread safe! don't use if you
+                                 * have multiple tests */
+        ..Default::default()
+    })?;
+
+    let mut alu = runtime.create_model::<Alu>()?;
+
+    alu.a = 0;
+    alu.b = 0;
+    alu.sub = 0;
+    alu.op = 0;
+
+    alu.eval();
+    assert_eq!(alu.r,0); 
+    ...
+```
+
+To run tests and capture the output:
+
+```shell
+cargo test -- --nocapture
 ```

@@ -5,3 +5,7 @@
 *.f
 *.lock
 *.vcd
+
+# Added by cargo
+
+/target
