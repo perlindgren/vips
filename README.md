@@ -24,10 +24,8 @@ veryl test src/pcplus4.veryl --wave
 surfer src/pcplus4.vcd
 ```
 
+Drag `TOP/test` to the view pane.
 ![image](images/pc_plus4.png)
-
-
-
 
 ## Marlin Test
 
