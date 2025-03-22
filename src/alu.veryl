@@ -39,7 +39,7 @@ module Alu (
     assign a_or_b  = a | b;
 
     inst mux: Mux4 (
-        v: {a_and_b, a_or_b, sum, extend_out},
+        i: {a_and_b, a_or_b, sum, extend_out},
         s: op                                ,
         o: r                                 ,
     );

@@ -1,21 +1,21 @@
 module Mux4 (
-    v: input  logic<32> [4],
+    i: input  logic<32> [4],
     s: input  logic<2>     ,
     o: output logic<32>    ,
 ) {
-    assign o = v[s];
+    assign o = i[s];
 }
 
 #[test(mux4)]
 embed (inline) sv{{{
     module test;
-        logic [31:0] v [4];
+        logic [31:0] i [4];
         logic [1:0] sel;
         logic [31:0] o;
-        adder_Mux4 Mux4 (v, sel, o);
+        adder_Mux4 Mux4 (i, sel, o);
 
         initial begin
-            v = {1,2,3,4};
+            i = {1,2,3,4};
             sel = 0;
             #10;
             assert (o == 1) else $error("0->1");
