@@ -21,7 +21,7 @@ E.g., the `PcPlus4` module (which has no dependency):
 
 ```shell
 veryl test src/pcplus4.veryl --wave
-surfer src/pcplus4vcd
+surfer src/pcplus4.vcd
 ```
 
 ![image](images/pc_plus4.png)
