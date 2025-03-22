@@ -6,7 +6,7 @@
 - Veryl, https://veryl-lang.org/install/
 - Optional dependencies:
   - Surfer, https://gitlab.com/surfer-project/surfer (Stand alone wave viewer)
-  - Merlin, https://www.ethanuppal.com/marlin/ (used as a Rust library)
+  - Marlin, https://www.ethanuppal.com/marlin/ (used as a Rust library)
 
 ## Veryl Test & Simulation
 
@@ -15,7 +15,7 @@ veryl test --wave
 surfer src/<module.vcd>
 ```
 
-## Merlin Test
+## Marlin Test
 
 This allows us to use the rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
 
