@@ -1,0 +1,62 @@
+// src/regfile.veryl
+
+module Regfile (
+    i_clk     : input  clock    , // dedicated clock
+    i_reset   : input  reset    , // dedicated reset
+    i_a_addr  : input  logic<5> ,
+    i_b_addr  : input  logic<5> ,
+    i_w_ena   : input  logic    ,
+    i_w_addr  : input  logic<5> ,
+    i_w_data  : input  logic<32>,
+    i_dbg_addr: input  logic<5> ,
+    o_a_data  : output logic<32>,
+    o_b_data  : output logic<32>,
+    o_dbg     : output logic<32>,
+
+) {
+    var regs: logic<32> [32];
+    always_ff {
+        if i_reset {
+            // regs = {{32'0} repeat 5};
+        } else {
+            if i_w_ena {
+                regs[i_w_addr] = i_w_data;
+            }
+        }
+    }
+
+    always_comb {
+        // o_a_data = if i_a_addr == 0 { 0 } else { regs[i_a_addr] };
+        // o_b_data = if i_b_addr == 0 { 0 } else { regs[i_b_addr] };
+        // o_dbg    = regs[i_dbg_addr];
+    }
+}
+
+#[test(regfile)]
+embed (inline) sv{{{
+    module test;
+//         logic i_clk     ;
+//         i_reset   : input  reset    ,
+//     i_a_addr  : input  logic<5> ,
+//     i_b_addr  : input  logic<5> ,
+//     i_w_ena   : input  logic    ,
+//     i_w_addr  : input  logic<5> ,
+//     i_w_data  : input  logic<32>,
+//     i_dbg_addr: input  logic<5> ,
+//     o_a_data  : output logic<32>,
+//     o_b_data  : output logic<32>,
+//     o_dbg     : output logic<32>,
+
+         initial begin
+//             i = 0;
+//             #10;
+//             assert (o == 0) else $error("0");
+
+//             i = 1;
+//             #10;
+//             assert (o == 1) else $error("1");
+
+            $finish;
+         end
+   endmodule
+}}}

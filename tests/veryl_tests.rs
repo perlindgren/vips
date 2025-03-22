@@ -94,5 +94,7 @@ fn test_alu() -> Result<(), Whatever> {
     dump(&alu);
     assert_eq!(alu.r, u32::MAX);
 
+    alu = Alu { ..alu };
+
     Ok(())
 }
