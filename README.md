@@ -17,14 +17,16 @@ surfer src/<module.vcd>
 ```
 
 One can also test individual modules and their dependencies:
-E.g., the `PcPlus4` module (which has no dependency):
+E.g., the `PcPlus4` module (which depends on `adder`, which depends on `full_adder`):
 
 ```shell
-veryl test src/pcplus4.veryl --wave
+veryl test src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl --wave
 surfer src/pcplus4.vcd
 ```
 
-Drag `TOP/test` to the view pane.
+For now verilator is broken (falsely reporting circular dependency). Remove the `--wave` and tests will pass, but you'll get no waveforms.
+
+Once this work, Drag `TOP/test` to the view pane, and you should get: 
 ![image](images/pc_plus4.png)
 
 ## Marlin Test

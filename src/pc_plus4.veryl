@@ -3,10 +3,21 @@ module PcPlus4 (
     i_reset: input  logic    ,
     o_pc   : output logic<32>,
 ) {
-    var pc: logic<32>;
+    var pc   : logic<32>;
+    var sum  : logic<32>;
+    var carry: logic    ;
+
+    inst adder: Adder #(
+        Width: 32,
+    ) (
+        a    : pc,
+        b    : 4 ,
+        sum      ,
+        carry    ,
+    );
 
     always_ff {
-        pc = if i_reset { 0 } else { pc + 4 };
+        pc = if i_reset { 0 } else { sum };
     }
     assign o_pc = pc;
 }
