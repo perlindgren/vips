@@ -9,6 +9,7 @@ module Alu (
     z  : output logic    ,
 
 ) {
+    /* verilator lint_off UNOPTFLAT */
     var sum       : logic<32>;
     var extend_in : logic    ;
     var extend_out: logic<32>;
@@ -30,7 +31,7 @@ module Alu (
     assign extend_in = sum[msb];
 
     inst zero_extend: ZeroExtend (
-        v: extend_in ,
+        i: extend_in ,
         o: extend_out,
     );
 
@@ -42,6 +43,7 @@ module Alu (
         s: op                                ,
         o: r                                 ,
     );
+    /* verilator lint_off UNOPTFLAT */
 }
 
 #[test(alu)]
