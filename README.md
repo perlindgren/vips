@@ -24,7 +24,7 @@ veryl test src/pcplus4.veryl --wave
 surfer src/pcplus4vcd
 ```
 
-![image](doc/pc_plus4.png)
+![image](images/pc_plus4.png)
 
 
 
