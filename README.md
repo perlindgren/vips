@@ -1,4 +1,4 @@
-# MIPS32 based single-cycle model in Veryl-lang
+# VIPS, MIPS32 based single-cycle model in Veryl-lang
 
 ## Dependencies
 
@@ -8,12 +8,26 @@
   - Surfer, https://gitlab.com/surfer-project/surfer (Stand alone wave viewer)
   - Marlin, https://www.ethanuppal.com/marlin/ (used as a Rust library)
 
-## Veryl Test & Simulation
+## Veryl Test, Simulation, and View 
 
+To test all modules:
 ```shell
 veryl test --wave
 surfer src/<module.vcd>
 ```
+
+One can also test individual modules and their dependencies:
+E.g., the `PcPlus4` module (which has no dependency):
+
+```shell
+veryl test src/pcplus4.veryl --wave
+surfer src/pcplus4vcd
+```
+
+![image](doc/pc_plus4.png)
+
+
+
 
 ## Marlin Test
 
@@ -67,3 +81,5 @@ To run tests and capture the output:
 ```shell
 cargo test -- --nocapture
 ```
+
+##

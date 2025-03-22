@@ -4,6 +4,7 @@
         "Veryl",
         "endmodule",
         "nocapture",
+        "pcplus",
         "verilator"
     ]
 }
