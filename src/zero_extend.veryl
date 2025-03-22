@@ -11,17 +11,17 @@ embed (inline) sv{{{
         logic v;
         logic [31:0] o;
         adder_ZeroExtend ZeroExtend (v, o );
-        
+
         initial begin
-            v = 0; 
+            v = 0;
             #10;
             assert (o == 0) else $error("0");
 
-            v = 1; 
+            v = 1;
             #10;
             assert (o == 1) else $error("1");
-            
-            $finish; 
+
+            $finish;
         end
     endmodule
 }}}

@@ -27,7 +27,7 @@ embed (inline) sv{{{
             a = 1; b = 0;
             #10;
             assert (sum == 1 && carry == 0) else $error("1+0");
-            
+
             a = 0; b = 1;
             #10;
             assert (sum == 1 && carry == 0) else $error("0+1");
@@ -36,7 +36,7 @@ embed (inline) sv{{{
             #10;
             assert (sum == 0 && carry == 1) else $error("1+1");
 
-            $finish; 
+            $finish;
         end
     endmodule
 }}}

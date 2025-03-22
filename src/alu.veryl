@@ -1,28 +1,93 @@
-// module Alu (
-//     a  : input  logic<32>,
-//     b  : input  logic<32>,
-//     sub: input  logic    ,
-//     op : input  logic<2> ,
-//     r  : output logic    ,
-//     v  : output logic    ,
-//     c  : output logic    ,
-//     z  : output logic    ,
+module Alu (
+    a  : input  logic<32>,
+    b  : input  logic<32>,
+    sub: input  logic    ,
+    op : input  logic<2> ,
+    r  : output logic<32>,
+    v  : output logic    ,
+    c  : output logic    ,
+    z  : output logic    ,
 
-// ) {
-//     var sum: logic<32>;
-//     inst adder: Adder (
-//         a       ,
-//         b       ,
-//         sum     ,
-//         carry: c,
-//     );
-//     always_comb {
-//         case a {
-//             0      : r = a & b;
-//             1      : r = a | b;
-//             3      : r = sum;
-//             default: r = 0;
-//         }
-//     }
-// }
+) {
+    var sum       : logic<32>;
+    var extend_in : logic    ;
+    var extend_out: logic<32>;
+    var a_and_b   : logic<32>;
+    var a_or_b    : logic<32>;
 
+    inst arith: Arith #(
+        Width: 32,
+    ) (
+        a       ,
+        b       ,
+        sub     ,
+        r  : sum,
+        v       ,
+        c       ,
+    );
+
+    assign z         = r == 0;
+    assign extend_in = sum[msb];
+
+    inst zero_extend: ZeroExtend (
+        v: extend_in ,
+        o: extend_out,
+    );
+
+    assign a_and_b = a & b;
+    assign a_or_b  = a | b;
+
+    inst mux: Mux4 (
+        v: {a_and_b, a_or_b, sum, extend_out},
+        s: op                                ,
+        o: r                                 ,
+    );
+}
+
+#[test(alu)]
+embed (inline) sv{{{
+    module test;
+        logic [31:0] a;
+        logic [31:0] b;
+        logic sub;
+        logic [1:0] op;
+        logic [31:0] r;
+        logic v;
+        logic c;
+        logic z;
+
+        adder_Alu Alu (a, b, sub, op, r, v, c, z);
+
+        initial begin
+            // and
+            a = 1; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 0) else $error("1 & 2");
+
+            a = 2; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 2) else $error("2 & 2");
+
+            // or
+            a = 1; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 3) else $error("1 | 2");
+
+            a = 2; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 2) else $error("2 | 2");
+
+            // add
+            a = 100; b = 200; sub = 0; op = 2;
+            #10;
+            assert (r == 300 && c == 0 && v == 0 && z == 0) else $error("100 + 200");
+
+            // a = 2; b = 2; sub = 0; op = 2;
+            // #10;
+            // assert (r == 2) else $error("2 | 2");
+
+            
+            $finish;
+        end
+    endmodule
+}}}
