@@ -43,10 +43,10 @@ embed (inline) sv{{{
             assert (pc == 4) else $error("4");
 
             clk = 0; #10 clk = 1; #10;
-            assert (pc == 8) else $error("0");
+            assert (pc == 8) else $error("8");
 
             clk = 0; #10 clk = 1; #10;
-            assert (pc == 12) else $error("0");
+            assert (pc == 12) else $error("12");
 
             $finish;
         end

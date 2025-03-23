@@ -1,6 +1,6 @@
 // src/regfile.veryl
 
-module Regfile (
+module RegFile (
     i_clk     : input  clock    , // dedicated clock
     i_reset   : input  reset    , // dedicated reset
     i_a_addr  : input  logic<5> ,
@@ -11,7 +11,7 @@ module Regfile (
     i_dbg_addr: input  logic<5> ,
     o_a_data  : output logic<32>,
     o_b_data  : output logic<32>,
-    o_dbg     : output logic<32>,
+    o_dbg_data: output logic<32>,
 
 ) {
     var regs: logic<32> [32];
@@ -30,35 +30,94 @@ module Regfile (
     }
 
     always_comb {
-        // o_a_data = if i_a_addr == 0 { 0 } else { regs[i_a_addr] };
-        // o_b_data = if i_b_addr == 0 { 0 } else { regs[i_b_addr] };
-        // o_dbg    = regs[i_dbg_addr];
+        o_a_data   = if i_a_addr == 0 { 0 } else { regs[i_a_addr] };
+        o_b_data   = if i_b_addr == 0 { 0 } else { regs[i_b_addr] };
+        o_dbg_data = regs[i_dbg_addr];
     }
 }
 
 #[test(regfile)]
 embed (inline) sv{{{
     module test;
-//         logic i_clk     ;
-//         i_reset   : input  reset    ,
-//     i_a_addr  : input  logic<5> ,
-//     i_b_addr  : input  logic<5> ,
-//     i_w_ena   : input  logic    ,
-//     i_w_addr  : input  logic<5> ,
-//     i_w_data  : input  logic<32>,
-//     i_dbg_addr: input  logic<5> ,
-//     o_a_data  : output logic<32>,
-//     o_b_data  : output logic<32>,
-//     o_dbg     : output logic<32>,
+        logic i_clk;
+        logic i_reset;
+        logic [4:0] i_a_addr;
+        logic [4:0] i_b_addr;
+        logic i_w_ena;
+        logic [4:0] i_w_addr;
+        logic [31:0] i_w_data;
+        logic [4:0] i_dbg_addr;
+        logic [31:0] o_a_data;
+        logic [31:0] o_b_data;
+        logic [31:0] o_dbg_data;
+        
+        adder_RegFile regfile(
+            i_clk,
+            i_reset, 
+            i_a_addr,
+            i_b_addr,
+            i_w_ena,
+            i_w_addr,
+            i_w_data,
+            i_dbg_addr,
+            o_a_data,
+            o_b_data,
+            o_dbg_data
+        );
 
-         initial begin
-//             i = 0;
-//             #10;
-//             assert (o == 0) else $error("0");
+        initial begin
+            i_clk = 0; 
+            i_reset = 1; 
+            i_a_addr = 0; 
+            i_b_addr = 0; 
+            i_w_ena = 0; 
+            i_w_addr = 0; 
+            i_w_data = 0; 
+            i_dbg_addr = 0;
 
-//             i = 1;
-//             #10;
-//             assert (o == 1) else $error("1");
+            // hold reset
+            #10; i_clk=1; #10; i_clk=0;
+            assert (o_a_data == 0) else $error("0");
+            assert (o_b_data == 0) else $error("0");
+            assert (o_dbg_data == 0) else $error("0");
+
+            // release reset
+            i_reset = 0;
+            #10; i_clk=1; #10; i_clk=0;
+            
+            // write to reg 0
+            i_w_ena = 1;
+            i_w_data = 10;
+            #10; i_clk=1; #10; i_clk=0;
+              
+            // write to reg 1
+            i_w_addr = 1;
+            i_w_data = 100;
+            #10; i_clk=1; #10; i_clk=0;
+            assert (o_dbg_data == 10) else $error("gdb 10");            
+
+            // write to reg 2
+            i_w_addr = 2;
+            i_w_data = 1000;
+            i_a_addr = 1;
+            #10; i_clk=1; #10; i_clk=0;
+            assert (o_a_data == 100) else $error("a 100");            
+
+            // write to reg 2
+            i_w_ena = 0;
+            i_b_addr = 2;
+            #10; i_clk=1; #10; i_clk=0;
+            assert (o_b_data == 1000) else $error("b 1000");            
+
+            // reset 
+            i_reset = 1;
+            #10; i_clk=1; #10; i_clk=0;
+            assert (o_a_data == 0) else $error("0");
+            assert (o_b_data == 0) else $error("0");
+            assert (o_dbg_data == 0) else $error("0");
+
+            i_reset = 0;
+            #10; i_clk=1; #10; i_clk=0;
 
             $finish;
          end
