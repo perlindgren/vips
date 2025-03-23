@@ -1,0 +1,62 @@
+// src/decoder.veryl
+
+// support for
+// ADD, ADDI, SUB, SLT, SLTI, AND, OR
+//
+// [31..26]              [5..9]
+// -------------------------------
+// 100000                      ADD
+// 100010                      SUB
+// 101010                      SLT
+// 001000                      ADDI
+// 001010                      SLTI
+//
+// 000000               100100 AND
+// 000000               100101 OR
+
+// AluOp
+// 00 AND
+// 01 OR
+// 10 Arith
+// 11 Neg
+
+// AluSource
+// 0 reg
+// 1 imm
+
+module Decoder (
+    opcode         : input  logic<6>,
+    funct          : input  logic<6>,
+    z              : input  logic   ,
+    reg_destination: output logic   ,
+    write_enable   : output logic   ,
+    alu_source     : output logic   ,
+    alu_sub        : output logic   ,
+    alu_op         : output logic<2>,
+
+) {
+    always_comb {
+
+        // if opcode[5] {
+        //     // R-Type ADD SUB SLT
+        //     write_enable = 1;
+        //     alu_source   = 0;
+        //     alu_sub      = opcode[1]; // ADD/SUB/SLT
+        //     alu_op       = 10; // Arith
+        // } else if op {
+
+        // }
+        case opcode {
+            100000 | 100010 | 101010: {}
+                                      //     1: b = 2;
+                                      //     2: {
+                                      //            b = 3;
+                                      //            b = 3;
+                                      //            b = 3;
+                                      //        }
+            default: {}
+        }
+
+    }
+
+}

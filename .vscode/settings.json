@@ -1,10 +1,15 @@
 {
     "cSpell.ignoreWords": [
+        "ADDI",
+        "SLTI",
         "UNOPTFLAT",
         "Veryl",
         "endmodule",
+        "funct",
         "nocapture",
         "pcplus",
+        "regfile",
+        "regs",
         "verilator"
     ]
 }
