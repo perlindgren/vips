@@ -39,7 +39,7 @@ embed (inline) sv{{{
         logic v;
         logic c;
 
-        adder_Arith arith (a, b, sub, r, v, c);
+        vips_Arith arith (a, b, sub, r, v, c);
 
         initial begin
             a = 0; b = 0; sub = 0;

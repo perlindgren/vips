@@ -31,7 +31,7 @@ embed (inline) sv{{{
         logic [3:0] b;
         logic [3:0] sum;
         logic carry;
-        adder_Adder #(4) adder (a, b, sum, carry);
+        vips_Adder #(4) adder (a, b, sum, carry);
 
         initial begin
             a = 0; b = 1;
@@ -58,7 +58,7 @@ embed (inline) sv{{{
         logic [31:0] b;
         logic [31:0] sum;
         logic carry;
-        adder_Adder #(32) adder (a, b, sum, carry);
+        vips_Adder #(32) adder (a, b, sum, carry);
 
         initial begin
             a = 0; b = 100;
@@ -100,4 +100,4 @@ async def test(dut):
 }}}
 
 #[test(adder32_py_extern, Adder)]
-include (cocotb, "adder_tb.py");
+include (cocotb, "vips_tb.py");

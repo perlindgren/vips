@@ -10,7 +10,7 @@ embed (inline) sv{{{
     module test;
         logic i;
         logic [31:0] o;
-        adder_ZeroExtend ZeroExtend (i, o);
+        vips_ZeroExtend ZeroExtend (i, o);
 
         initial begin
             i = 0;

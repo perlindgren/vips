@@ -29,7 +29,7 @@ embed (inline) sv{{{
         logic reset;
         logic [31:0] pc;
        
-        adder_PcPlus4 pcplus4 (clk, reset, pc);
+        vips_PcPlus4 pcplus4 (clk, reset, pc);
 
         initial begin
             reset = 1;

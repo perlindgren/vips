@@ -17,7 +17,7 @@ embed (inline) sv{{{
         logic b;
         logic sum;
         logic carry;
-        adder_HalfAdder half_adder (a, b, sum, carry);
+        vips_HalfAdder half_adder (a, b, sum, carry);
 
         initial begin
             a = 0; b = 0;

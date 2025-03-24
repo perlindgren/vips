@@ -12,7 +12,7 @@ embed (inline) sv{{{
         logic [31:0] i [4];
         logic [1:0] sel;
         logic [31:0] o;
-        adder_Mux4 Mux4 (i, sel, o);
+        vips_Mux4 Mux4 (i, sel, o);
 
         initial begin
             i = {1,2,3,4};

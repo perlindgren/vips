@@ -82,4 +82,19 @@ To run tests and capture the output:
 cargo test -- --nocapture
 ```
 
-##
+## List of current tests.
+
+For now using the explicit syntax for declaring dependencies.
+
+```shell
+veryl test src/mux.veryl --wave
+veryl test src/half_adder.veryl --wave
+veryl test src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl --wave
+veryl test src/decoder.veryl --wave
+veryl test src/zero_extend.veryl --wave
+veryl test src/regfile.veryl --wave
+veryl test src/arith.veryl src/full_adder.veryl --wave
+veryl test src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl 
+```
+
+Notice, the `--wave` option for `alu` test does not currently work.

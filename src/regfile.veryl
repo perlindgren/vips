@@ -51,7 +51,7 @@ embed (inline) sv{{{
         logic [31:0] o_b_data;
         logic [31:0] o_dbg_data;
         
-        adder_RegFile regfile(
+        vips_RegFile regfile(
             i_clk,
             i_reset, 
             i_a_addr,

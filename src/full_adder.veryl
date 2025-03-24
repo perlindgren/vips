@@ -17,7 +17,7 @@ embed (inline) sv{{{
         logic c;
         logic sum;
         logic carry;
-        adder_FullAdder full_adder (a, b, c, sum, carry);
+        vips_FullAdder full_adder (a, b, c, sum, carry);
 
         initial begin
             // without carry in

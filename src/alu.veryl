@@ -58,7 +58,7 @@ embed (inline) sv{{{
         logic c;
         logic z;
 
-        adder_Alu Alu (a, b, sub, op, r, v, c, z);
+        vips_Alu Alu (a, b, sub, op, r, v, c, z);
 
         initial begin
             // and
