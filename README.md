@@ -37,15 +37,17 @@ This allows us to use the Rust built in test framework. The module under test is
 
 ```sv
 // src/alu.veryl
-module Alu (
-    a  : input  logic<32>,
-    b  : input  logic<32>,
-    sub: input  logic    ,
-    op : input  logic<2> ,
-    r  : output logic<32>,
-    v  : output logic    ,
-    c  : output logic    ,
-    z  : output logic    ,
+module Alu #(
+    param Width: u32 = 32,
+) (
+    a  : input  logic<Width>,
+    b  : input  logic<Width>,
+    sub: input  logic       ,
+    op : input  logic<2>    ,
+    r  : output logic<Width>,
+    v  : output logic       ,
+    c  : output logic       ,
+    z  : output logic       ,
 )
 ```
 
@@ -88,7 +90,7 @@ cargo test -- --nocapture
 
 ### Alu
 
-The Alu module:
+The Alu module, configured for 4 bit wide inputs:
 
 ![image](images/vips_alu.svg)
 

@@ -1,7 +1,9 @@
-module Mux4 (
-    i: input  logic<32> [4],
+module Mux4 #(
+    param Width: u32 = 32,
+) (
+    i: input  logic<Width> [4],
     s: input  logic<2>     ,
-    o: output logic<32>    ,
+    o: output logic<Width>    ,
 ) {
     assign o = i[s];
 }

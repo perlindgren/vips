@@ -1,23 +1,24 @@
-module Alu (
-    a  : input  logic<32>,
-    b  : input  logic<32>,
-    sub: input  logic    ,
-    op : input  logic<2> ,
-    r  : output logic<32>,
-    v  : output logic    ,
-    c  : output logic    ,
-    z  : output logic    ,
-
+module Alu #(
+    param Width: u32 = 32,
+) (
+    a  : input  logic<Width>,
+    b  : input  logic<Width>,
+    sub: input  logic       ,
+    op : input  logic<2>    ,
+    r  : output logic<Width>,
+    v  : output logic       ,
+    c  : output logic       ,
+    z  : output logic       ,
 ) {
     /* verilator lint_off UNOPTFLAT */
-    var sum       : logic<32>;
-    var extend_in : logic    ;
-    var extend_out: logic<32>;
-    var a_and_b   : logic<32>;
-    var a_or_b    : logic<32>;
+    var sum       : logic<Width>;
+    var extend_in : logic       ;
+    var extend_out: logic<Width>;
+    var a_and_b   : logic<Width>;
+    var a_or_b    : logic<Width>;
 
     inst arith: Arith #(
-        Width: 32,
+        Width  ,
     ) (
         a       ,
         b       ,
@@ -30,7 +31,9 @@ module Alu (
     assign z         = r == 0;
     assign extend_in = sum[msb] ^ v;
 
-    inst zero_extend: ZeroExtend (
+    inst zero_extend: ZeroExtend #(
+        Width  ,
+    ) (
         i: extend_in ,
         o: extend_out,
     );
@@ -38,10 +41,12 @@ module Alu (
     assign a_and_b = a & b;
     assign a_or_b  = a | b;
 
-    inst mux: Mux4 (
-        i: {a_and_b, a_or_b, sum, extend_out},
-        s: op                                ,
-        o: r                                 ,
+    inst mux: Mux4 #(
+        Width                                    ,
+    ) (
+        i    : {a_and_b, a_or_b, sum, extend_out},
+        s    : op                                ,
+        o    : r                                 ,
     );
     /* verilator lint_off UNOPTFLAT */
 }
@@ -58,7 +63,7 @@ embed (inline) sv{{{
         logic c;
         logic z;
 
-        vips_Alu Alu (a, b, sub, op, r, v, c, z);
+        vips_Alu alu (a, b, sub, op, r, v, c, z);
 
         initial begin
             // and
@@ -103,6 +108,68 @@ embed (inline) sv{{{
             #10;
             assert (r == 1 && c == 0 && v == 0 && z == 0) else $error("100 - 101");       
           
+            $finish;
+        end
+    endmodule
+}}}
+
+#[test(alu4)]
+embed (inline) sv{{{
+    module test;
+        logic [3:0] a;
+        logic [3:0] b;
+        logic sub;
+        logic [1:0] op;
+        logic [3:0] r;
+        logic v;
+        logic c;
+        logic z;
+
+        vips_Alu #(4) alu4 (a, b, sub, op, r, v, c, z);
+
+        initial begin
+            // and
+            a = 1; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 0) else $error("1 & 2");
+
+            a = 2; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 2) else $error("2 & 2");
+
+            // or
+            a = 1; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 3) else $error("1 | 2");
+
+            a = 2; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 2) else $error("2 | 2");
+
+            // add
+            a = 1; b = 2; sub = 0; op = 2;
+            #10;
+            assert (r == 3 && c == 0 && v == 0 && z == 0) else $error("100 + 200");
+
+            // sub
+            a = 2; b = 1; sub = 1; op = 2;
+            #10;
+            assert (r == 1 && c == 1 && v == 0 && z == 0) else $error("200 - 100");
+
+            a = 1; b = 1; sub = 1; op = 2;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // slt
+            a = 1; b = 1; sub = 1; op = 3;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // slt
+            a = 1; b = 2; sub = 1; op = 3;
+            #10;
+            assert (r == 1 && c == 0 && v == 0 && z == 0) else $error("100 - 101");
+
             $finish;
         end
     endmodule

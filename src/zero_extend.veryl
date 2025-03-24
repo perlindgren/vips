@@ -1,8 +1,10 @@
-module ZeroExtend (
-    i: input  logic    ,
-    o: output logic<32>,
+module ZeroExtend #(
+    param Width: u32 = 32,
+) (
+    i: input  logic       ,
+    o: output logic<Width>,
 ) {
-    assign o = {1'0 repeat 31, i};
+    assign o = {1'0 repeat Width - 1, i};
 }
 
 #[test(zero_extend)]
