@@ -28,7 +28,7 @@ module Alu (
     );
 
     assign z         = r == 0;
-    assign extend_in = sum[msb];
+    assign extend_in = sum[msb] ^ v;
 
     inst zero_extend: ZeroExtend (
         i: extend_in ,

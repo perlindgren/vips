@@ -152,7 +152,7 @@ fn test_alu() -> Result<(), Whatever> {
     alu.b = 0x7000_0000i32 as u32;
     alu.eval();
     dump(&alu);
-    assert_eq!(alu.r as u8 ^ alu.v, 1);
+    assert_eq!(alu.r, 1);
 
     // 0x7000_0000 < -0x7000_0000
     // you need to take overflow into account
@@ -160,7 +160,7 @@ fn test_alu() -> Result<(), Whatever> {
     alu.b = -0x7000_0000i32 as u32;
     alu.eval();
     dump(&alu);
-    assert_eq!(alu.r as u8 ^ alu.v, 0);
+    assert_eq!(alu.r, 0);
 
     // alu = Alu { ..alu };
 
