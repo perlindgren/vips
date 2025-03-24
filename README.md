@@ -33,7 +33,7 @@ Once this work, Drag `TOP/test` to the view pane, and you should get:
 
 ## Marlin Test
 
-This allows us to use the rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
+This allows us to use the Rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
 
 ```sv
 // src/alu.veryl
