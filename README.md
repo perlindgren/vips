@@ -11,6 +11,7 @@
 ## Veryl Test, Simulation, and View 
 
 To test all modules:
+
 ```shell
 veryl test --wave
 surfer src/<module.vcd>
@@ -26,7 +27,8 @@ surfer src/pcplus4.vcd
 
 For now verilator is broken (falsely reporting circular dependency). Remove the `--wave` and tests will pass, but you'll get no waveforms.
 
-Once this work, Drag `TOP/test` to the view pane, and you should get: 
+Once this work, Drag `TOP/test` to the view pane, and you should get:
+
 ![image](images/pc_plus4.png)
 
 ## Marlin Test
@@ -82,7 +84,15 @@ To run tests and capture the output:
 cargo test -- --nocapture
 ```
 
-## List of current tests.
+## Modules
+
+### Alu
+
+![image](images/vips_alu.svg)
+
+![image](images/vips_alu.png)
+
+## List of current tests
 
 For now using the explicit syntax for declaring dependencies.
 
