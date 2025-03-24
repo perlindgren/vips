@@ -94,6 +94,74 @@ fn test_alu() -> Result<(), Whatever> {
     dump(&alu);
     assert_eq!(alu.r, u32::MAX);
 
+    // testing for SLT
+    // 2 < 1
+    alu.a = 2;
+    alu.b = 1;
+    alu.sub = 1;
+    alu.op = 3; // N bit to bit 0
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 0);
+
+    // 1 < 2
+    alu.a = 1;
+    alu.b = 2;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 1);
+
+    // 1 < 1
+    alu.a = 1;
+    alu.b = 1;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 0);
+
+    // -1 < 2
+    alu.a = -1i32 as u32;
+    alu.b = 2;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 1);
+
+    // -1 < -2
+    alu.a = -1i32 as u32;
+    alu.b = -2i32 as u32;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 0);
+
+    // -2 < -1
+    alu.a = -2i32 as u32;
+    alu.b = -1i32 as u32;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 1);
+
+    // -0x7000_0000 < 0
+    alu.a = -0x7000_0000i32 as u32;
+    alu.b = 0;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r, 1);
+
+    // -0x7000_0000 < 0x7000_0000
+    // you need to take overflow into account
+    alu.a = -0x7000_0000i32 as u32;
+    alu.b = 0x7000_0000i32 as u32;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r as u8 ^ alu.v, 1);
+
+    // 0x7000_0000 < -0x7000_0000
+    // you need to take overflow into account
+    alu.a = 0x7000_0000i32 as u32;
+    alu.b = -0x7000_0000i32 as u32;
+    alu.eval();
+    dump(&alu);
+    assert_eq!(alu.r as u8 ^ alu.v, 0);
+
     // alu = Alu { ..alu };
 
     Ok(())

@@ -2,13 +2,13 @@
 
 ## Dependencies
 
-- Verilator, https://verilator.org/guide/latest/install.html
-- Veryl, https://veryl-lang.org/install/
+- Verilator, [install](https://verilator.org/guide/latest/install.html)
+- Veryl, [install](https://veryl-lang.org/install/)
 - Optional dependencies:
-  - Surfer, https://gitlab.com/surfer-project/surfer (Stand alone wave viewer)
-  - Marlin, https://www.ethanuppal.com/marlin/ (used as a Rust library)
+  - Surfer, [install](https://gitlab.com/surfer-project/surfer) (Stand alone wave viewer)
+  - Marlin, [library](https://www.ethanuppal.com/marlin/) (used as a Rust library)
 
-## Veryl Test, Simulation, and View 
+## Veryl Test, Simulation, and View
 
 To test all modules:
 
