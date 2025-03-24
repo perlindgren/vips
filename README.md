@@ -88,9 +88,9 @@ cargo test -- --nocapture
 
 ### Alu
 
-![image](images/vips_alu.svg)
+The Alu module:
 
-![image](images/vips_alu.png)
+![image](images/vips_alu.svg)
 
 ## List of current tests
 
