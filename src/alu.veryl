@@ -42,13 +42,35 @@ module Alu #(
     assign a_or_b  = a | b;
 
     inst mux: Mux4 #(
-        Width                                    ,
+        Width  ,
     ) (
-        i    : {a_and_b, a_or_b, sum, extend_out},
-        s    : op                                ,
-        o    : r                                 ,
+        i: {a_and_b, a_or_b, sum, extend_out},
+        s: op                                ,
+        o: r                                 ,
     );
     /* verilator lint_off UNOPTFLAT */
+}
+
+module Alu32 (
+    a  : input  logic<32>,
+    b  : input  logic<32>,
+    sub: input  logic    ,
+    op : input  logic<2> ,
+    r  : output logic<32>,
+    v  : output logic    ,
+    c  : output logic    ,
+    z  : output logic    ,
+) {
+    inst alu32: Alu (
+        a    ,
+        b    ,
+        sub  ,
+        op   ,
+        r    ,
+        v    ,
+        c    ,
+        z    ,
+    );
 }
 
 #[test(alu)]

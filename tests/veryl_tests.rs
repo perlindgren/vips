@@ -2,11 +2,11 @@
 use marlin::veryl::prelude::*;
 use snafu::Whatever;
 
-#[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
-pub struct FullAdder;
+// #[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
+// pub struct FullAdder;
 
-#[veryl(src = "src/alu.veryl", name = "Alu")]
-pub struct Alu;
+#[veryl(src = "src/alu.veryl", name = "Alu32")]
+pub struct Alu32;
 
 // #[test]
 // #[snafu::report]
@@ -53,7 +53,7 @@ pub struct Alu;
 #[test]
 #[snafu::report]
 fn test_alu() -> Result<(), Whatever> {
-    fn dump(alu: &Alu) {
+    fn dump(alu: &Alu32) {
         println!(
             "a {}, b {}, sub {}, op {}‚ r {}, v {}, c {}‚ z {}",
             alu.a, alu.b, alu.sub, alu.op, alu.r, alu.v, alu.c, alu.z
@@ -66,7 +66,7 @@ fn test_alu() -> Result<(), Whatever> {
         ..Default::default()
     })?;
 
-    let mut alu = runtime.create_model::<Alu>()?;
+    let mut alu = runtime.create_model::<Alu32>()?;
 
     alu.a = 0;
     alu.b = 0;
