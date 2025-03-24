@@ -68,16 +68,24 @@ fn test_alu() -> Result<(), Whatever> {
 
     let mut alu = runtime.create_model::<Alu32>()?;
 
-    alu.a = 0;
-    alu.b = 0;
-    alu.sub = 0;
-    alu.op = 0;
+    // assignment by struct
+    alu = Alu32 {
+        a: 0,
+        b: 0,
+        sub: 0,
+        ..alu
+    };
 
     alu.eval();
     dump(&alu);
 
-    alu.a = 100;
-    alu.op = 2;
+    alu = Alu32 {
+        a: 100,
+        op: 2,
+        ..alu
+    };
+
+    // assignment by field, both are possible
     alu.eval();
     dump(&alu);
 
@@ -161,8 +169,6 @@ fn test_alu() -> Result<(), Whatever> {
     alu.eval();
     dump(&alu);
     assert_eq!(alu.r, 0);
-
-    // alu = Alu { ..alu };
 
     Ok(())
 }
