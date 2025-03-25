@@ -1,0 +1,83 @@
+module Alu32 (
+    a  : input  logic<32>,
+    b  : input  logic<32>,
+    sub: input  logic    ,
+    op : input  logic<2> ,
+    r  : output logic<32>,
+    v  : output logic    ,
+    c  : output logic    ,
+    z  : output logic    ,
+) {
+    inst alu32: Alu (
+        a    ,
+        b    ,
+        sub  ,
+        op   ,
+        r    ,
+        v    ,
+        c    ,
+        z    ,
+    );
+}
+
+#[test(alu32)]
+embed (inline) sv{{{
+    module test;
+        logic [31:0] a;
+        logic [31:0] b;
+        logic sub;
+        logic [1:0] op;
+        logic [31:0] r;
+        logic v;
+        logic c;
+        logic z;
+
+        vips_Alu alu (a, b, sub, op, r, v, c, z);
+
+        initial begin
+            // and
+            a = 1; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 0) else $error("1 & 2");
+
+            a = 2; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 2) else $error("2 & 2");
+
+            // or
+            a = 1; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 3) else $error("1 | 2");
+
+            a = 2; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 2) else $error("2 | 2");
+
+            // add
+            a = 100; b = 200; sub = 0; op = 2;
+            #10;
+            assert (r == 300 && c == 0 && v == 0 && z == 0) else $error("100 + 200");
+
+            // sub
+            a = 200; b = 100; sub = 1; op = 2;
+            #10;
+            assert (r == 100 && c == 1 && v == 0 && z == 0) else $error("200 - 100");
+
+            a = 100; b = 100; sub = 1; op = 2;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // neg?
+            a = 100; b = 100; sub = 1; op = 3;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // neg?
+            a = 100; b = 101; sub = 1; op = 3;
+            #10;
+            assert (r == 1 && c == 0 && v == 0 && z == 0) else $error("100 - 101");
+
+            $finish;
+        end
+    endmodule
+}}}

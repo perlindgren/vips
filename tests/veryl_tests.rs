@@ -5,7 +5,7 @@ use snafu::Whatever;
 // #[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
 // pub struct FullAdder;
 
-#[veryl(src = "src/alu.veryl", name = "Alu32")]
+#[veryl(src = "src/alu32.veryl", name = "Alu32")]
 pub struct Alu32;
 
 // #[test]
