@@ -32,7 +32,7 @@ embed (inline) sv{{{
         logic c;
         logic z;
 
-        vips_Alu alu (a, b, sub, op, r, v, c, z);
+        vips_Alu32 alu (a, b, sub, op, r, v, c, z);
 
         initial begin
             // and

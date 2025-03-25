@@ -25,8 +25,6 @@ veryl test src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl --wave
 surfer src/pcplus4.vcd
 ```
 
-For now verilator is broken (falsely reporting circular dependency). Remove the `--wave` and tests will pass, but you'll get no waveforms.
-
 Once this work, Drag `TOP/test` to the view pane, and you should get:
 
 ![image](images/pc_plus4.png)
@@ -36,25 +34,23 @@ Once this work, Drag `TOP/test` to the view pane, and you should get:
 This allows us to use the Rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
 
 ```sv
-// src/alu.veryl
-module Alu #(
-    param Width: u32 = 32,
-) (
-    a  : input  logic<Width>,
-    b  : input  logic<Width>,
-    sub: input  logic       ,
-    op : input  logic<2>    ,
-    r  : output logic<Width>,
-    v  : output logic       ,
-    c  : output logic       ,
-    z  : output logic       ,
+// src/alu32.veryl
+module Alu32 (
+    a  : input  logic<32>,
+    b  : input  logic<32>,
+    sub: input  logic    ,
+    op : input  logic<2> ,
+    r  : output logic<32>,
+    v  : output logic    ,
+    c  : output logic    ,
+    z  : output logic    ,
 )
 ```
 
 ```rust
 // tests/veryl_tests.rs
 ...
-#[veryl(src = "src/alu.veryl", name = "Alu")]
+#[veryl(src = "src/alu32.veryl", name = "Alu32")]
 pub struct Alu;
 
 #[test]
@@ -68,7 +64,7 @@ fn test_alu() -> Result<(), Whatever> {
         ..Default::default()
     })?;
 
-    let mut alu = runtime.create_model::<Alu>()?;
+    let mut alu = runtime.create_model::<Alu32>()?;
 
     alu.a = 0;
     alu.b = 0;
@@ -85,6 +81,8 @@ To run tests and capture the output:
 ```shell
 cargo test -- --nocapture
 ```
+
+You can also run the test directly from within vscode by pressing the `Run Test` button.
 
 ## Modules
 

@@ -2,53 +2,60 @@
 use marlin::veryl::prelude::*;
 use snafu::Whatever;
 
-// #[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
-// pub struct FullAdder;
+#[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
+pub struct FullAdder;
 
 #[veryl(src = "src/alu32.veryl", name = "Alu32")]
 pub struct Alu32;
 
-// #[test]
-// #[snafu::report]
-// fn test_full_adder() -> Result<(), Whatever> {
-//     let runtime = VerylRuntime::new(VerylRuntimeOptions {
-//         call_veryl_build: true, /* warning: not thread safe! don't use if you
-//                                  * have multiple tests */
-//         ..Default::default()
-//     })?;
+#[test]
+#[snafu::report]
+fn test_full_adder() -> Result<(), Whatever> {
+    let runtime = VerylRuntime::new(VerylRuntimeOptions {
+        call_veryl_build: true, /* warning: not thread safe! don't use if you
+                                 * have multiple tests */
+        ..Default::default()
+    })?;
 
-//     let mut full_adder = runtime.create_model::<FullAdder>()?;
+    let mut full_adder = runtime.create_model::<FullAdder>()?;
 
-//     full_adder.a = 0;
-//     full_adder.b = 0;
-//     full_adder.c = 0;
-//     full_adder.eval();
-//     println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
-//     assert!(full_adder.sum == 0 && full_adder.carry == 0);
+    full_adder.a = 0;
+    full_adder.b = 0;
+    full_adder.c = 0;
+    full_adder.eval();
+    println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
+    assert!(full_adder.sum == 0 && full_adder.carry == 0);
 
-//     full_adder.a = 1;
-//     full_adder.eval();
-//     println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
-//     assert!(full_adder.sum == 1 && full_adder.carry == 0);
+    full_adder.a = 1;
+    full_adder.eval();
+    println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
+    assert!(full_adder.sum == 1 && full_adder.carry == 0);
 
-//     full_adder.b = 1;
-//     full_adder.eval();
-//     println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
-//     assert!(full_adder.sum == 0 && full_adder.carry == 1);
+    full_adder.b = 1;
+    full_adder.eval();
+    println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
+    assert!(full_adder.sum == 0 && full_adder.carry == 1);
 
-//     full_adder.c = 1;
-//     full_adder.eval();
-//     println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
-//     assert!(full_adder.sum == 1 && full_adder.carry == 1);
+    full_adder.c = 1;
+    full_adder.eval();
+    println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
+    assert!(full_adder.sum == 1 && full_adder.carry == 1);
 
-//     // full_adder = FullAdder { a: 1, ..full_adder };
-//     // // full_adder.eval();
+    // struct assign, there are some hidden fields, thus ..full_adder is needed.
+    full_adder = FullAdder {
+        a: 1,
+        b: 0,
+        c: 0,
+        ..full_adder
+    };
 
-//     // println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
-//     // assert!(full_adder.sum == 1 && full_adder.carry == 0);
+    full_adder.eval();
 
-//     Ok(())
-// }
+    println!("sum {}, carry {}", full_adder.sum, full_adder.carry);
+    assert!(full_adder.sum == 1 && full_adder.carry == 0);
+
+    Ok(())
+}
 
 #[test]
 #[snafu::report]
@@ -73,25 +80,31 @@ fn test_alu() -> Result<(), Whatever> {
         a: 0,
         b: 0,
         sub: 0,
+        op: 0,
         ..alu
     };
+    assert_eq!(alu.r, 0);
 
     alu.eval();
     dump(&alu);
+    assert_eq!(alu.r, 0);
 
+    // test add
     alu = Alu32 {
         a: 100,
         op: 2,
         ..alu
     };
 
-    // assignment by field, both are possible
     alu.eval();
     dump(&alu);
+    assert_eq!(alu.r, 100);
 
+    // assignment by field, both are possible
     alu.b = 100;
     alu.eval();
     dump(&alu);
+    assert_eq!(alu.r, 200);
 
     alu.sub = 1;
     alu.eval();
