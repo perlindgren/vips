@@ -1,0 +1,61 @@
+#[test(alu4)]
+embed (inline) sv{{{
+    module test;
+        logic [3:0] a;
+        logic [3:0] b;
+        logic sub;
+        logic [1:0] op;
+        logic [3:0] r;
+        logic v;
+        logic c;
+        logic z;
+
+        vips_Alu #(.Width (4)) alu (a, b, sub, op, r, v, c, z);
+
+        initial begin
+            // and
+            a = 1; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 0) else $error("1 & 2");
+
+            a = 2; b = 2; sub = 0; op = 0;
+            #10;
+            assert (r == 2) else $error("2 & 2");
+
+            // or
+            a = 1; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 3) else $error("1 | 2");
+
+            a = 2; b = 2; sub = 0; op = 1;
+            #10;
+            assert (r == 2) else $error("2 | 2");
+
+            // add
+            a = 1; b = 2; sub = 0; op = 2;
+            #10;
+            assert (r == 3 && c == 0 && v == 0 && z == 0) else $error("100 + 200");
+
+            // sub
+            a = 2; b = 1; sub = 1; op = 2;
+            #10;
+            assert (r == 1 && c == 1 && v == 0 && z == 0) else $error("200 - 100");
+
+            a = 1; b = 1; sub = 1; op = 2;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // slt
+            a = 1; b = 1; sub = 1; op = 3;
+            #10;
+            assert (r == 0 && c == 1 && v == 0 && z == 1) else $error("100 - 100");
+
+            // slt
+            a = 1; b = 2; sub = 1; op = 3;
+            #10;
+            assert (r == 1 && c == 0 && v == 0 && z == 0) else $error("100 - 101");
+
+            $finish;
+        end
+    endmodule
+}}}
