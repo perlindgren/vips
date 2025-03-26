@@ -7,6 +7,7 @@
 - Optional dependencies:
   - Surfer, [install](https://gitlab.com/surfer-project/surfer) (Stand alone wave viewer)
   - Marlin, [library](https://www.ethanuppal.com/marlin/) (used as a Rust library)
+  - Cocotb, [install](https://docs.cocotb.org/en/stable/install.html)
 
 ## Veryl Test, Simulation, and View
 
@@ -105,8 +106,8 @@ veryl test src/zero_extend.veryl --wave
 veryl test src/regfile.veryl --wave
 veryl test src/arith.veryl src/full_adder.veryl --wave
 veryl test src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl
-veryl test src/alu4_test.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl 
-veryl test src/alu32_test.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl
+veryl test src/alu4.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl 
+veryl test src/alu32.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl
 ```
 
 Notice, the `--wave` option for `alu` test does not currently work.
