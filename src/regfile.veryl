@@ -20,7 +20,6 @@ module RegFile (
             // regs = {{32'0} repeat 32};
             for i: u32 in 0..32 {
                 regs[i] = 0;
-
             }
         } else {
             if i_w_ena {
