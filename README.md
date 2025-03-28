@@ -9,6 +9,18 @@
   - Marlin, [library](https://www.ethanuppal.com/marlin/) (used as a Rust library)
   - Cocotb, [install](https://docs.cocotb.org/en/stable/install.html)
 
+## Installation
+
+The project has been tested under Linux (arch, and arch based Manjaro) and MacOs.
+
+Rust based tooling (Veryl, Surfer) works as expected cross the board of operating systems. (First make sure that you have a work rust tool-chain installed ([Rust](https://www.rust-lang.org/tools/install)), and follow the instructions for installing Veryl and Surfer as above). Marlin is brought in as a library by Veryl, so no separate installation is required.
+
+For Verilator, you may use your system's package manager. Under arch based Linux `pacman`, while under MacOs either [Brew](https://brew.sh/) or [Mac Ports](https://www.macports.org/). For better performance you may want to install Verilator from source. This allows to use `ccache`for accelerating incremental builds and `mold`for improved linker performance. Further details are operating system dependent and not covered here.
+
+Cocotb, is implemented in python. Here you have the option to either install in the python package manager, or through the system wide package manager, so it depends on your system installation which way to go, python provides a jungle of opportunities to get lost.
+
+The tests in this repo, exemplifies the various methods to test Veryl modules adopting System Verilog, cocotb and Marlin.
+
 ## Veryl Test, Simulation, and View
 
 To test all modules:

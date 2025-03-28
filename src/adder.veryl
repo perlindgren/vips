@@ -100,4 +100,4 @@ async def test(dut):
 }}}
 
 #[test(adder32_py_extern, Adder)]
-include (cocotb, "vips_tb.py");
+include (cocotb, "vips_adder_tb.py");
