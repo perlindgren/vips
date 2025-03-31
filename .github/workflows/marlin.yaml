@@ -1,0 +1,33 @@
+name: Marlin CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 1 # since we cache
+
+jobs:
+  test_veryl:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Verilator
+        run: |
+          if [[ "$(uname)" == "Darwin" ]]; then
+            brew install verilator
+          else
+            sudo apt-get install -y verilator
+          fi
+      - name: Install Veryl
+        uses: veryl-lang/setup-veryl@v1
+      - name: Test
+        run: veryl build && cargo test

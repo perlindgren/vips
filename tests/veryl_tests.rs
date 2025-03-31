@@ -1,4 +1,5 @@
-// file: tests/simple_test.rs
+use std::env;
+
 use marlin::veryl::prelude::*;
 use snafu::Whatever;
 
@@ -12,8 +13,9 @@ pub struct Alu32;
 #[snafu::report]
 fn test_full_adder() -> Result<(), Whatever> {
     let runtime = VerylRuntime::new(VerylRuntimeOptions {
-        call_veryl_build: true, /* warning: not thread safe! don't use if you
-                                 * have multiple tests */
+        call_veryl_build: env::var("RUNNING_TESTS_INDEPENDENTLY")
+            .map(|value| &value == "1")
+            .unwrap_or(false),
         ..Default::default()
     })?;
 
@@ -68,8 +70,9 @@ fn test_alu() -> Result<(), Whatever> {
     }
 
     let runtime = VerylRuntime::new(VerylRuntimeOptions {
-        call_veryl_build: true, /* warning: not thread safe! don't use if you
-                                 * have multiple tests */
+        call_veryl_build: env::var("RUNNING_TESTS_INDEPENDENTLY")
+            .map(|value| &value == "1")
+            .unwrap_or(false),
         ..Default::default()
     })?;
 
