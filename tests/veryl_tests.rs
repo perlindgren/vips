@@ -1,3 +1,5 @@
+use std::env;
+
 use marlin::veryl::prelude::*;
 use snafu::Whatever;
 
@@ -10,7 +12,12 @@ pub struct Alu32;
 #[test]
 #[snafu::report]
 fn test_full_adder() -> Result<(), Whatever> {
-    let runtime = VerylRuntime::new(VerylRuntimeOptions::default())?;
+    let runtime = VerylRuntime::new(VerylRuntimeOptions {
+        call_veryl_build: env::var("RUNNING_TESTS_INDEPENDENTLY")
+            .map(|value| &value == "1")
+            .unwrap_or(false),
+        ..Default::default()
+    })?;
 
     let mut full_adder = runtime.create_model::<FullAdder>()?;
 
@@ -63,7 +70,12 @@ fn test_alu() -> Result<(), Whatever> {
         );
     }
 
-    let runtime = VerylRuntime::new(VerylRuntimeOptions::default())?;
+    let runtime = VerylRuntime::new(VerylRuntimeOptions {
+        call_veryl_build: env::var("RUNNING_TESTS_INDEPENDENTLY")
+            .map(|value| &value == "1")
+            .unwrap_or(false),
+        ..Default::default()
+    })?;
 
     let mut alu = runtime.create_model::<Alu32>()?;
 
