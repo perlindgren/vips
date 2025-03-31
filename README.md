@@ -92,6 +92,7 @@ fn test_alu() -> Result<(), Whatever> {
 To run tests and capture the output:
 
 ```shell
+veryl build
 cargo test -- --nocapture
 ```
 

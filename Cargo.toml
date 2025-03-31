@@ -8,4 +8,3 @@ edition = "2024"
 [dev-dependencies]
 marlin = { version = "0.6.1", features = ["veryl"] }
 snafu = "0.8.5"
-colog = "1.3.0"

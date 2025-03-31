@@ -1,6 +1,4 @@
-use std::sync::LazyLock;
-
-use marlin::{verilator::VerilatorRuntimeOptions, veryl::prelude::*};
+use marlin::veryl::prelude::*;
 use snafu::Whatever;
 
 #[veryl(src = "src/full_adder.veryl", name = "FullAdder")]
@@ -9,21 +7,10 @@ pub struct FullAdder;
 #[veryl(src = "src/alu32.veryl", name = "Alu32")]
 pub struct Alu32;
 
-//static INIT: LazyLock<()> = LazyLock::new(|| colog::init());
-
 #[test]
 #[snafu::report]
 fn test_full_adder() -> Result<(), Whatever> {
-    //let _ = INIT.clone();
-    let runtime = VerylRuntime::new(VerylRuntimeOptions {
-        call_veryl_build: true, /* warning: not thread safe! don't use if you
-                                 * have multiple tests */
-        verilator_options: VerilatorRuntimeOptions {
-            log: true,
-            ..Default::default()
-        },
-        ..Default::default()
-    })?;
+    let runtime = VerylRuntime::new(VerylRuntimeOptions::default())?;
 
     let mut full_adder = runtime.create_model::<FullAdder>()?;
 
@@ -76,15 +63,7 @@ fn test_alu() -> Result<(), Whatever> {
         );
     }
 
-    let runtime = VerylRuntime::new(VerylRuntimeOptions {
-        call_veryl_build: true, /* warning: not thread safe! don't use if you
-                                 * have multiple tests */
-        verilator_options: VerilatorRuntimeOptions {
-            //log: true,
-            ..Default::default()
-        },
-        ..Default::default()
-    })?;
+    let runtime = VerylRuntime::new(VerylRuntimeOptions::default())?;
 
     let mut alu = runtime.create_model::<Alu32>()?;
 
