@@ -62,7 +62,6 @@ fn test_full_adder() -> Result<(), Whatever> {
 #[test]
 #[snafu::report]
 fn test_alu() -> Result<(), Whatever> {
-    //let _ = INIT.clone();
     fn dump(alu: &Alu32) {
         println!(
             "a {}, b {}, sub {}, op {}‚ r {}, v {}, c {}‚ z {}",
