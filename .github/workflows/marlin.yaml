@@ -1,4 +1,4 @@
-name: CI
+name: Marlin CI
 
 on:
   pull_request:
