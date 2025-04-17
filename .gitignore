@@ -5,6 +5,7 @@
 *.f
 *.lock
 *.vcd
+info.toml
 
 # Added by cargo
 

@@ -17,7 +17,7 @@ module PcPlus4 (
     );
 
     always_ff {
-        pc = if i_reset { 0 } else { sum };
+        pc = if i_reset ? 0 : sum;
     }
     assign o_pc = pc;
 }

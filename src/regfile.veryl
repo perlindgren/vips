@@ -29,8 +29,8 @@ module RegFile (
     }
 
     always_comb {
-        o_a_data   = if i_a_addr == 0 { 0 } else { regs[i_a_addr] };
-        o_b_data   = if i_b_addr == 0 { 0 } else { regs[i_b_addr] };
+        o_a_data   = if i_a_addr == 0 ? 0 : regs[i_a_addr];
+        o_b_data   = if i_b_addr == 0 ? 0 : regs[i_b_addr];
         o_dbg_data = regs[i_dbg_addr];
     }
 }
