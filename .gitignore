@@ -6,6 +6,7 @@
 *.lock
 *.vcd
 info.toml
+.build
 
 # Added by cargo
 
