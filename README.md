@@ -72,8 +72,9 @@ fn test_alu() -> Result<(), Whatever> {
     ...
 
     let runtime = VerylRuntime::new(VerylRuntimeOptions {
-        call_veryl_build: true, /* warning: not thread safe! don't use if you
-                                 * have multiple tests */
+        call_veryl_build: env::var("RUNNING_TESTS_INDEPENDENTLY")
+            .map(|value| &value == "1")
+            .unwrap_or(false),
         ..Default::default()
     })?;
 
@@ -106,6 +107,34 @@ The Alu module, configured for 4 bit wide inputs:
 
 ![image](images/vips_alu.svg)
 
+The Alu has the `sub` and `op` inputs defined as follows:
+
+| Operation | `sub` | `op` | 
+| --------- | :---: | :--: |
+| and       |   0   |  00  |
+| or        |   0   |  01  |
+| add       |   0   |  10  |
+| sub       |   1   |  10  |
+| slt       |   1   |  11  |
+
+### Decoder
+
+The VIPS support a subset of the MIPS32 ISA:
+
+
+| Operation | `rf_we` | `sub` | `op` | `alu_src` |
+| --------- | :-----: | :---: | :--: |  :------: |  
+| and       |    1    |   0   |  00  |  0  |  |
+| or        |    1    |   0   |  01  |  0  |  |
+| add       |    1    |   0   |  10  |  0  |  |
+| sub       |    1    |   1   |  10  |  0  |  |
+| slt       |    1    |   1   |  11  |  0  |  |
+| addi      |    1    |   0   |  10  |  0  |  |
+| subi      |    1    |   1   |  10  |  0  |  |
+| slti      |    1    |   1   |  11  |  0  |  |
+
+![image](images/decoder.svg)
+   
 ## List of current tests
 
 For now using the explicit syntax for declaring dependencies.
