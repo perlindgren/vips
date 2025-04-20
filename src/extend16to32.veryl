@@ -1,0 +1,33 @@
+module Extend16to32 (
+    i_data    : input  logic<16>,
+    i_sign_ext: input  logic    ,
+    o_data    : output logic<32>,
+) {
+    assign o_data = {i_data[msb] & i_sign_ext repeat 16, i_data};
+}
+
+#[test(extend16to32)]
+embed (inline) sv{{{
+    module test;
+        logic [15:0] i_data;
+        logic i_sign_ext;
+        logic [31:0] o_data;
+        vips_Extend16to32 Extend (i_data, i_sign_ext, o_data);
+
+        initial begin
+            i_data = 16'h0000; i_sign_ext = 0;
+            #10;
+            assert (o_data == 32'h0000_0000) else $error("zero extend 0");
+
+            i_data = 16'hFFFF; i_sign_ext = 0;
+            #10;
+            assert (o_data == 32'h0000_FFFF) else $error("zero extend 0xFFFF");
+
+            i_data = 16'hFFFF; i_sign_ext = 1;
+            #10;
+            assert (o_data == 32'hFFFF_FFFF) else $error("sign extend 0xFFFF");
+
+            $finish;
+        end
+    endmodule
+}}}
