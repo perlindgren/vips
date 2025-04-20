@@ -6,6 +6,7 @@
         "UNOPTFLAT",
         "Verilog",
         "Veryl",
+        "andi",
         "ccache",
         "endmodule",
         "funct",
