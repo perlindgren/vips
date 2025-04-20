@@ -99,6 +99,23 @@ cargo test -- --nocapture
 
 You can also run the test directly from within vscode by pressing the `Run Test` button.
 
+## Vips registers
+
+| Number |   Name   |
+| :----: | :------: |
+|     0  |  zero    |
+|     1  |  at      |
+|  2..3  |  v0..v1  |
+|  4..7  |  a0..a2  |
+|  8..15 |  t0..t7  |
+| 16..23 |  s0..s7  |
+| 24..25 |  t8..t9  |
+| 26..27 |  k0..k1  |
+|    28  |  gp      |
+|    29  |  sp      |
+|    30  |  fp      |
+|    31  |  ra      |
+
 ## Modules
 
 ### Alu
@@ -109,7 +126,7 @@ The Alu module, configured for 4 bit wide inputs:
 
 The Alu has the `sub` and `op` inputs defined as follows:
 
-| Operation | `sub` | `op` | 
+| Operation | `sub` | `op` |
 | --------- | :---: | :--: |
 | and       |   0   |  00  |
 | or        |   0   |  01  |
@@ -121,20 +138,20 @@ The Alu has the `sub` and `op` inputs defined as follows:
 
 The VIPS support a subset of the MIPS32 ISA:
 
-
-| Operation | `rf_we` | `sub` | `op` | `alu_src` |
-| --------- | :-----: | :---: | :--: |  :------: |  
-| and       |    1    |   0   |  00  |  0  |  |
-| or        |    1    |   0   |  01  |  0  |  |
-| add       |    1    |   0   |  10  |  0  |  |
-| sub       |    1    |   1   |  10  |  0  |  |
-| slt       |    1    |   1   |  11  |  0  |  |
-| addi      |    1    |   0   |  10  |  0  |  |
-| subi      |    1    |   1   |  10  |  0  |  |
-| slti      |    1    |   1   |  11  |  0  |  |
+| Operation | `rf_we` | `wb_reg` | `sub` | `op` | `alu_src` | `sign_ext` |
+| --------- | :-----: | :------: | :---: | :--: |  :------: | :--------: |
+| and       |    1    |    1     |   0   |  00  |  0        |    x       |
+| or        |    1    |    1     |   0   |  01  |  0        |    x       |
+| add       |    1    |    1     |   0   |  10  |  0        |    x       |
+| sub       |    1    |    1     |   1   |  10  |  0        |    x       |
+| slt       |    1    |    1     |   1   |  11  |  0        |    x       |
+| andi      |    1    |    0     |   0   |  00  |  1        |    0       |
+| ori       |    1    |    0     |   0   |  01  |  1        |    0       |
+| addi      |    1    |    0     |   0   |  10  |  1        |    1       |
+| slti      |    1    |    0     |   1   |  11  |  1        |    1       |
 
 ![image](images/decoder.svg)
-   
+
 ## List of current tests
 
 For now using the explicit syntax for declaring dependencies.
