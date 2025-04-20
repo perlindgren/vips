@@ -1,0 +1,34 @@
+// src/mux2.veryl
+
+module Mux2 #(
+    param Width: u32 = 32,
+) (
+    i_data: input  logic<Width> [2],
+    i_sel : input  logic           ,
+    o_data: output logic<Width>    ,
+) {
+    assign o_data = i_data[i_sel];
+}
+
+#[test(mux2)]
+embed (inline) sv{{{
+    module test;
+        logic [31:0] i_data [2];
+        logic i_sel;
+        logic [31:0] o_data;
+        vips_Mux2 Mux2 (i_data, i_sel, o_data);
+
+        initial begin
+            i_data = {1,2};
+            i_sel = 0;
+            #10;
+            assert (o_data == 1) else $error("0->1");
+
+            i_sel = 1;
+            #10;
+            assert (o_data == 2) else $error("1->2");
+            
+            $finish;
+        end
+    endmodule
+}}}

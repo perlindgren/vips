@@ -1,0 +1,41 @@
+// src/mux4.veryl
+
+module Mux4 #(
+    param Width: u32 = 32,
+) (
+    i_data: input  logic<Width> [4],
+    i_s   : input  logic<2>        ,
+    o_data: output logic<Width>    ,
+) {
+    assign o_data = i_data[i_s];
+}
+
+#[test(mux4)]
+embed (inline) sv{{{
+    module test;
+        logic [31:0] i_data [4];
+        logic [1:0] i_sel;
+        logic [31:0] o_data;
+        vips_Mux4 Mux4 (i_data, i_sel, o_data);
+
+        initial begin
+            i_data = {1,2,3,4};
+            i_sel = 0;
+            #10;
+            assert (o_data == 1) else $error("0->1");
+
+            i_sel = 1;
+            #10;
+            assert (o_data == 2) else $error("1->2");
+
+            i_sel = 2;
+            #10;
+            assert (o_data == 3) else $error("2->3");
+
+            i_sel = 3;
+            #10;
+            assert (o_data == 4) else $error("3->4");
+            $finish;
+        end
+    endmodule
+}}}
