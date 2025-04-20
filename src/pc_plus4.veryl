@@ -1,3 +1,5 @@
+// src/pc_plus4.veryl
+
 module PcPlus4 (
     i_clk  : input  clock    ,
     i_reset: input  logic    ,
