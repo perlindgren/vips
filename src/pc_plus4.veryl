@@ -1,9 +1,9 @@
 // src/pc_plus4.veryl
 
 module PcPlus4 (
-    i_clk  : input  clock    ,
-    i_reset: input  logic    ,
-    o_pc   : output logic<32>,
+    i_clk  : input  clock               ,
+    i_reset: input  reset_async_high    ,
+    o_pc   : output logic           <32>,
 ) {
     var pc   : logic<32>;
     var sum  : logic<32>;
@@ -18,13 +18,18 @@ module PcPlus4 (
         carry    ,
     );
 
-    always_ff {
-        pc = if i_reset ? 0 : sum;
+    always_ff (i_clk, i_reset) {
+        if_reset {
+            pc = 0;
+        } else {
+            pc = sum;
+        }
+
     }
     assign o_pc = pc;
 }
 
-#[test(pcplus4)]
+#[test(pc_plus4)]
 embed (inline) sv{{{
     module test;
         logic clk;
