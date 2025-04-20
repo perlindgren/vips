@@ -1,3 +1,5 @@
+// src/alu.veryl
+
 module Alu #(
     param Width: u32 = 32,
 ) (
@@ -10,7 +12,6 @@ module Alu #(
     c  : output logic       ,
     z  : output logic       ,
 ) {
-    /* verilator lint_off UNOPTFLAT */
     var sum       : logic<Width>;
     var extend_in : logic       ;
     var extend_out: logic<Width>;
@@ -44,15 +45,14 @@ module Alu #(
     // sub alu opration code
     // 0   00 and
     // 0   01 or
-    // 0   10 add 
+    // 0   10 add
     // 1   10 sub
     // 1   11 slt
     inst mux: Mux4 #(
         Width  ,
     ) (
-        i: {a_and_b, a_or_b, sum, extend_out},
-        s: op                                ,
-        o: r                                 ,
+        i_data: {a_and_b, a_or_b, sum, extend_out},
+        i_sel : op                                ,
+        o_data: r                                 ,
     );
-    /* verilator lint_off UNOPTFLAT */
 }

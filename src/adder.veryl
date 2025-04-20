@@ -1,3 +1,5 @@
+// src/adder.veryl
+
 module Adder #(
     param Width: u32 = 32,
 ) (

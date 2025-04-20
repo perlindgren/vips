@@ -1,4 +1,6 @@
-module FullAdder #() (
+// src/full_adder.veryl
+
+module FullAdder (
     a    : input  logic,
     b    : input  logic,
     c    : input  logic,

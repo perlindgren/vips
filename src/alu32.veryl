@@ -1,3 +1,5 @@
+// src/alu32.veryl
+
 module Alu32 (
     a  : input  logic<32>,
     b  : input  logic<32>,

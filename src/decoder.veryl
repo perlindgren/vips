@@ -74,7 +74,7 @@ module Decoder (
                             sign_extend     = 1;
                             alu_source      = 1;
                             alu_sub         = 1;
-                            alu_op          = 2'b10;
+                            alu_op          = 2'b11;
                         }
                         // R-type
             6'b00_0000: {
@@ -206,51 +206,3 @@ embed (inline) sv{{{
         end
     endmodule
 }}}
-
-
-// logic [31:0] addr;
-//         logic [31:0] instr;
-
-//         vips_InstrMem instr_mem(addr, instr);
-
-
-//  case opcode {
-//             // andi, ori, addi, slti
-//             6'b00_1100 | 6'b00_1101 | 6'b00_1000 | 6'b00_1010: {
-//                                                                    write_enable = 1;
-//                                                                    sign_extend  = !opcode[2];
-//                                                                    alu_source   = 1;
-//                                                                    alu_op       = case opcode {
-//                                                                        // andi
-//                                                                        6'b00_1100: 'b00,
-//                                                                        // ori
-//                                                                        6'b00_1101: 'b01,
-//                                                                        // addi
-//                                                                        6'b00_1000: 'b10,
-//                                                                        // slti
-//                                                                        6'b00_1010: 'b11,
-//                                                                        default   : 0,
-
-//                                                                    };
-//                                                                }
-//             default: {}
-//         }
-
-// sequentially assigned variables
-// var v_we      : logic;
-// var v_sign_ext: logic;
-// var v_alu_src : logic;
-// var v_alu_sub : logic;
-// var v_alu_op  : logic;
-
-// write_enable = v_we;
-// alu_source   = v_alu_src;
-// alu_sub      = v_alu_sub;
-// alu_op       = v_alu_op;
-
-// // default assignments
-// v_we       = 0;
-// v_sign_ext = 0; // zero extend
-// v_alu_src  = 0; // R type
-// v_alu_sub  = 0; // add
-// v_alu_op   = 0; // and
