@@ -4,10 +4,10 @@ module Mux4 #(
     param Width: u32 = 32,
 ) (
     i_data: input  logic<Width> [4],
-    i_s   : input  logic<2>        ,
+    i_sel : input  logic<2>        ,
     o_data: output logic<Width>    ,
 ) {
-    assign o_data = i_data[i_s];
+    assign o_data = i_data[i_sel];
 }
 
 #[test(mux4)]
