@@ -1,127 +1,189 @@
 // src/decoder.veryl
 
 // support for
-// ADD, ADDI, SUB, SLT, SLTI, AND, OR
+// ADD, ADDI, SUB, SLT, SLTI, AND, OR, LW, SW
 //
-// [31..26]              [5..0]     sub  op s_ext w_reg d_reg
-// -------------------------------- ---  -- ----- ----- -----
-// 00_1100                     ANDI  x   00  x      1     1
-// 00_1101                     ORI   x   01  x      1     1
-// 00_1000                     ADDI  0   10  x      1     1
-// 00_1010                     SLTI  0   11  x      1     1
+// [31..26]     [5..0]              sub  op alu_src s_ext rf_we dm_we  r_src d_src
+// -------------------------------- ---  -- ------- ----- ----- -----  ----- -----
+// 00_1100 (0x0c)              ANDI  x   00    1      0     1     0      1     0
+// 00_1101 (0x0d)              ORI   x   01    1      0     1     0      1     0
+// 00_1000 (0x08)              ADDI  0   10    1      1     1     0      1     0
+// 00_1010 (0x0a)              SLTI  1   11    1      1     1     0      1     0
+// 10_0011 (0x23)              LW    0   10    1      1     1     0      1     1
+// 10_0011 (0x2b)              SW    0   10    1      1     x     1      1     x
 
-// 000000              10_0100 AND   x   00  0      1     0
-// 000000              10_0101 OR    x   01  0      1     0
-// 000000              10_0000 ADD   0   10  1      1     0
-// 000000              10_0010 SUB   1   10  1      1     0
-// 000000              10_1010 SLT   1   11  1      1     0
+// 000000       10_0100 (0x24) AND   x   00    0      x     1     0      0     0
+// 000000       10_0101 (0x25) OR    x   01    0      x     1     0      0     0
+// 000000       10_0000 (0x20) ADD   0   10    0      x     1     0      0     0
+// 000000       10_0010 (0x22) SUB   1   10    0      x     1     0      0     0
+// 000000       10_1010 (0x2a) SLT   1   11    0      x     1     0      0     0
 
-// AluOp
+// sub AluSub
+// 0 Additon
+// 1 Subtraction
+
+// op AluOp
 // 00 AND
 // 01 OR
 // 10 Arith
 // 11 Neg
 
-// AluSource
-// 0 reg
+// alu_src AluSource
+// 0 reg b
 // 1 imm
 
+// s_ext immediate
+// 0 zero extend
+// 1 sign extend
+
+// rf_we register file write enable
+// 0 disable
+// 1 enable
+
+// dm_we data memory write enable
+// 0 disable
+// 1 enable
+
+// r_src reg_destination
+// 0 rt
+// 1 rd
+
+// d_src data to register file
+// 0 alu
+// 1 dm
+
 module Decoder (
-    opcode         : input  logic<6>,
-    funct          : input  logic<6>,
-    z              : input  logic   ,
-    reg_destination: output logic   ,
-    write_enable   : output logic   ,
-    sign_extend    : output logic   ,
-    alu_source     : output logic   ,
-    alu_sub        : output logic   ,
-    alu_op         : output logic<2>,
+    i_opcode         : input  logic<6>,
+    i_funct          : input  logic<6>,
+    i_z              : input  logic   ,
+    o_reg_destination: output logic   ,
+    o_write_enable   : output logic   ,
+    o_sign_extend    : output logic   ,
+    o_alu_source     : output logic   ,
+    o_alu_sub        : output logic   ,
+    o_alu_op         : output logic<2>,
+    o_dm_we          : output logic   ,
+    o_rf_d_source    : output logic   ,
 ) {
     always_comb {
 
-        case opcode {
-            // andi
+        case i_opcode {
+            // I type instructions
+            //          andi (0c)
             6'b00_1100: {
-                            reg_destination = 0;
-                            write_enable    = 1;
-                            sign_extend     = 0;
-                            alu_source      = 1;
-                            alu_sub         = 0;
-                            alu_op          = 2'b00;
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 1;
+                            o_sign_extend     = 0;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 0;
+                            o_alu_op          = 2'b00; // and
+                            o_dm_we           = 0;
+                            o_rf_d_source     = 0;
                         }
-                        // ori
+                        // ori (0d)
             6'b00_1101: {
-                            reg_destination = 0;
-                            write_enable    = 1;
-                            sign_extend     = 0;
-                            alu_source      = 1;
-                            alu_sub         = 0;
-                            alu_op          = 2'b01;
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 1;
+                            o_sign_extend     = 0;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 0;
+                            o_alu_op          = 2'b01; // or
+                            o_dm_we           = 0;
+                            o_rf_d_source     = 0;
                         }
-                        // addi
+                        // addi (08)
             6'b00_1000: {
-                            reg_destination = 0;
-                            write_enable    = 1;
-                            sign_extend     = 1;
-                            alu_source      = 1;
-                            alu_sub         = 0;
-                            alu_op          = 2'b10;
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 1;
+                            o_sign_extend     = 1;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 0;
+                            o_alu_op          = 2'b10; // arith
+                            o_dm_we           = 0;
+                            o_rf_d_source     = 0;
                         }
-                        // slti
+                        // slti (0a)
             6'b00_1010: {
-                            reg_destination = 0;
-                            write_enable    = 1;
-                            sign_extend     = 1;
-                            alu_source      = 1;
-                            alu_sub         = 1;
-                            alu_op          = 2'b11;
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 1;
+                            o_sign_extend     = 1;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 1;
+                            o_alu_op          = 2'b11; // slt
+                            o_dm_we           = 0;
+                            o_rf_d_source     = 0;
+                        }
+                        // lw (23)
+            6'b10_0011: {
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 1;
+                            o_sign_extend     = 1;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 0;
+                            o_alu_op          = 2'b10; // arith
+                            o_dm_we           = 0;
+                            o_rf_d_source     = 1;
+                        }
+                        // sw (2b)
+            6'b10_1011: {
+                            o_reg_destination = 0; // rt
+                            o_write_enable    = 0; // no write to register file
+                            o_sign_extend     = 1;
+                            o_alu_source      = 1;
+                            o_alu_sub         = 0;
+                            o_alu_op          = 2'b10; // arith
+                            o_dm_we           = 1;
+                            o_rf_d_source     = 0; // don't care
                         }
                         // R-type
             6'b00_0000: {
-                            reg_destination = 1;
-                            write_enable    = 1;
-                            alu_source      = 0;
-                            sign_extend     = 0;
-                            alu_sub         = funct[1];
-                            case funct {
+                            o_reg_destination = 1;
+                            o_write_enable    = 1;
+                            o_alu_source      = 0;
+                            o_sign_extend     = 0;
+                            o_dm_we           = 0; // no write to data memory
+                            o_rf_d_source     = 0; // alu result
+                            o_alu_sub         = i_funct[1];
+                            case i_funct {
                                 // and
                                 6'b10_0100: {
-                                    alu_op = 2'b00;
+                                    o_alu_op = 2'b00;
                                 }
                                 // or
                                 6'b10_0101: {
-                                    alu_op = 2'b01;
-
+                                    o_alu_op = 2'b01;
                                 }
                                 // add
                                 6'b10_0000: {
-                                    alu_op = 2'b10;
+                                    o_alu_op = 2'b10;
                                 }
                                 // sub
                                 6'b10_0010: {
-                                    alu_op = 2'b10;
+                                    o_alu_op = 2'b10;
                                 }
                                 // slt
                                 6'b10_1010: {
-                                    alu_op = 2'b11;
+                                    o_alu_op = 2'b11;
                                 }
 
                                 default: {
-                                 write_enable = 0;
-                                 alu_source   = 0; // don't care
-                                 alu_sub      = 0; // don't care
-                                 alu_op       = 2'b00; // don't care
+                                 o_write_enable = 0;
+                                 o_alu_source   = 0; // don't care
+                                 o_alu_sub      = 0; // don't care
+                                 o_alu_op       = 2'b00; // don't care
                              }
                             }
                         }
 
             default: {
-                         write_enable    = 0;
-                         reg_destination = 0; // don't care
-                         sign_extend     = 0; // don't care
-                         alu_source      = 0; // don't care
-                         alu_sub         = 0; // don't care
-                         alu_op          = 2'b00; // don't care
+                         o_write_enable    = 0;
+                         o_reg_destination = 0; // don't care
+                         o_sign_extend     = 0; // don't care
+                         o_alu_source      = 0; // don't care
+                         o_alu_sub         = 0; // don't care
+                         o_alu_op          = 2'b00; // don't care
+                         o_dm_we           = 0;
+                         o_rf_d_source     = 0; // don't care
                      }
         }
     }
@@ -139,6 +201,8 @@ embed (inline) sv{{{
         logic alu_source;
         logic alu_sub;
         logic [1:0] alu_op; 
+        logic dm_we;
+        logic rf_d_src;
 
         vips_Decoder decoder(
             opcode,
@@ -149,7 +213,9 @@ embed (inline) sv{{{
             sign_extend,
             alu_source,
             alu_sub,
-            alu_op
+            alu_op,
+            dm_we,
+            rf_d_src
         );
 
         initial begin

@@ -101,20 +101,20 @@ You can also run the test directly from within vscode by pressing the `Run Test`
 
 ## Vips registers
 
-| Number |   Name   |
-| :----: | :------: |
-|     0  |  zero    |
-|     1  |  at      |
-|  2..3  |  v0..v1  |
-|  4..7  |  a0..a2  |
-|  8..15 |  t0..t7  |
-| 16..23 |  s0..s7  |
-| 24..25 |  t8..t9  |
-| 26..27 |  k0..k1  |
-|    28  |  gp      |
-|    29  |  sp      |
-|    30  |  fp      |
-|    31  |  ra      |
+| Number |  Name  |
+| :----: | :----: |
+|   0    |  zero  |
+|   1    |   at   |
+|  2..3  | v0..v1 |
+|  4..7  | a0..a2 |
+| 8..15  | t0..t7 |
+| 16..23 | s0..s7 |
+| 24..25 | t8..t9 |
+| 26..27 | k0..k1 |
+|   28   |   gp   |
+|   29   |   sp   |
+|   30   |   fp   |
+|   31   |   ra   |
 
 ## Modules
 
@@ -126,29 +126,29 @@ The Alu module, configured for 4 bit wide inputs:
 
 The Alu has the `sub` and `op` inputs defined as follows:
 
-| Operation | `sub` | `op` |
-| --------- | :---: | :--: |
-| and       |   0   |  00  |
-| or        |   0   |  01  |
-| add       |   0   |  10  |
-| sub       |   1   |  10  |
-| slt       |   1   |  11  |
+| Operation | `sub` | `op`  |
+| --------- | :---: | :---: |
+| and       |   0   |  00   |
+| or        |   0   |  01   |
+| add       |   0   |  10   |
+| sub       |   1   |  10   |
+| slt       |   1   |  11   |
 
 ### Decoder
 
 The VIPS support a subset of the MIPS32 ISA:
 
-| Operation | `rf_we` | `wb_reg` | `sub` | `op` | `alu_src` | `sign_ext` |
-| --------- | :-----: | :------: | :---: | :--: |  :------: | :--------: |
-| and       |    1    |    1     |   0   |  00  |  0        |    x       |
-| or        |    1    |    1     |   0   |  01  |  0        |    x       |
-| add       |    1    |    1     |   0   |  10  |  0        |    x       |
-| sub       |    1    |    1     |   1   |  10  |  0        |    x       |
-| slt       |    1    |    1     |   1   |  11  |  0        |    x       |
-| andi      |    1    |    0     |   0   |  00  |  1        |    0       |
-| ori       |    1    |    0     |   0   |  01  |  1        |    0       |
-| addi      |    1    |    0     |   0   |  10  |  1        |    1       |
-| slti      |    1    |    0     |   1   |  11  |  1        |    1       |
+| Operation | `rf_we` | `wb_reg` | `sub` | `op`  | `alu_src` | `sign_ext` |
+| --------- | :-----: | :------: | :---: | :---: | :-------: | :--------: |
+| and       |    1    |    1     |   0   |  00   |     0     |     x      |
+| or        |    1    |    1     |   0   |  01   |     0     |     x      |
+| add       |    1    |    1     |   0   |  10   |     0     |     x      |
+| sub       |    1    |    1     |   1   |  10   |     0     |     x      |
+| slt       |    1    |    1     |   1   |  11   |     0     |     x      |
+| andi      |    1    |    0     |   0   |  00   |     1     |     0      |
+| ori       |    1    |    0     |   0   |  01   |     1     |     0      |
+| addi      |    1    |    0     |   0   |  10   |     1     |     1      |
+| slti      |    1    |    0     |   1   |  11   |     1     |     1      |
 
 ![image](images/decoder.svg)
 
@@ -157,16 +157,27 @@ The VIPS support a subset of the MIPS32 ISA:
 For now using the explicit syntax for declaring dependencies.
 
 ```shell
-veryl test src/mux.veryl --wave
+# simple components
+veryl test src/mux2.veryl --wave
+veryl test src/mux4.veryl --wave
 veryl test src/half_adder.veryl --wave
-veryl test src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl --wave
+veryl test src/decoder1.veryl --wave
 veryl test src/decoder.veryl --wave
 veryl test src/zero_extend.veryl --wave
-veryl test src/regfile.veryl --wave
-veryl test src/arith.veryl src/full_adder.veryl --wave
-veryl test src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl
-veryl test src/alu4.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl 
-veryl test src/alu32.veryl src/alu.veryl src/mux.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl
+veryl test src/extend16to32.veryl --wave
+veryl test src/regfile.veryl --wave 
+veryl test src/data_memory.veryl --wave 
+# composite components, alu 
+veryl test src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl --wave
+veryl test src/arith_test.veryl src/arith.veryl src/full_adder.veryl --wave
+veryl test src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
+veryl test src/alu4.veryl src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
+veryl test src/alu32.veryl src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
+# top level Vips1
+veryl test src/alu.veryl src/vips1.veryl src/mux2.veryl src/extend16to32.veryl src/regfile.veryl src/decoder1.veryl src/instr_mem.veryl src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl --wave
+# top level Vips
+veryl test src/alu.veryl src/vips.veryl src/mux2.veryl src/extend16to32.veryl src/regfile.veryl src/decoder.veryl src/instr_mem.veryl src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl --wave
+
 ```
 
-Notice, the `--wave` option for `alu` test does not currently work.
+

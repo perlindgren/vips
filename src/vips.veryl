@@ -4,7 +4,10 @@ module Vips (
     i_clk         : input  clock               ,
     i_reset       : input  reset_async_high    ,
     i_dbg_reg     : input  logic           <5> ,
+    i_dbg_dm_addr : input  logic           <32>,
     o_dbg_reg_data: output logic           <32>,
+    o_dbg_dm_data : output logic           <32>,
+
 ) {
     /* verilator lint_off UNOPTFLAT */
     var pc_addr: logic<32>;
@@ -36,17 +39,19 @@ module Vips (
     var alu_source     : logic   ;
     var alu_sub        : logic   ;
     var alu_op         : logic<2>;
+    var dm_we          : logic   ;
 
     inst decoder: Decoder (
-        opcode           ,
-        funct            ,
-        z                ,
-        reg_destination  ,
-        write_enable     ,
-        sign_extend      ,
-        alu_source       ,
-        alu_sub          ,
-        alu_op           ,
+        i_opcode         : opcode         ,
+        i_funct          : funct          ,
+        i_z              : z              ,
+        o_reg_destination: reg_destination,
+        o_write_enable   : write_enable   ,
+        o_sign_extend    : sign_extend    ,
+        o_alu_source     : alu_source     ,
+        o_alu_sub        : alu_sub        ,
+        o_alu_op         : alu_op         ,
+        o_dm_we          : dm_we          ,
     );
 
     var wb_reg: logic<5>;
@@ -61,7 +66,7 @@ module Vips (
 
     var a_data: logic<32>;
     var b_data: logic<32>;
-    var w_data: logic<32>;
+    var alu_r : logic<32>;
 
     inst regfile: RegFile (
         i_clk                     ,
@@ -70,7 +75,7 @@ module Vips (
         i_b_addr  : rt            ,
         i_w_ena   : write_enable  ,
         i_w_addr  : wb_reg        ,
-        i_w_data  : w_data        ,
+        i_w_data  : alu_r         ,
         i_dbg_addr: i_dbg_reg     ,
         o_a_data  : a_data        ,
         o_b_data  : b_data        ,
@@ -96,17 +101,29 @@ module Vips (
     var v: logic;
     var c: logic;
 
-    /* verilator lint_off UNOPTFLAT */
     inst alu: Alu (
         a  : a_data ,
         b  : alu_src,
         sub: alu_sub,
         op : alu_op ,
-        r  : w_data ,
+        r  : alu_r  ,
         v           ,
         c           ,
         z           ,
     );
+
+    var dm_data: logic<32>;
+    inst data_mem: DataMem (
+        i_clk                    ,
+        i_reset                  ,
+        i_we      : dm_we        ,
+        i_addr    : 0            ,
+        i_data    : 0            ,
+        i_dbg_addr: i_dbg_dm_addr,
+        o_data    : dm_data      ,
+        o_dbg_data: o_dbg_dm_data,
+    );
+
 }
 
 #[test(vips)]
