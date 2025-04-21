@@ -1,0 +1,94 @@
+// src/data_mem.veryl
+
+module DataMem #(
+    param Words: u32 = 32,
+) (
+    i_clk     : input  clock               ,
+    i_reset   : input  reset_async_high    ,
+    i_we      : input  logic               ,
+    i_addr    : input  logic           <32>, // byte address, but only word operations supported
+    i_data    : input  logic           <32>,
+    i_dbg_addr: input  logic           <32>,
+    o_data    : output logic           <32>,
+    o_dbg_data: output logic           <32>,
+) {
+    var mem: logic<32> [Words]; // mem is Words sized array of 32 bit data
+
+    // synchronized update
+    always_ff (i_clk, i_reset) {
+        if_reset {
+            for i: u32 in 0..Words {
+                mem[i] = 0;
+            }
+        } else {
+            if i_we {
+                mem[i_addr >> 2] = i_data;
+            }
+        }
+    }
+    // asynchronous read
+    assign o_data     = mem[i_addr >> 2];
+    assign o_dbg_data = mem[i_dbg_addr >> 2];
+}
+
+#[test(data_mem)]
+embed (inline) sv{{{
+    module test;
+        logic i_clk;
+        logic i_reset;
+        logic i_we;
+        logic [31:0] i_addr;
+        logic [31:0] i_data;
+        logic [31:0] i_dbg_addr;
+
+        logic [31:0] o_data;
+        logic [31:0] o_dbg_data;
+        
+        vips_DataMem data_mem(i_clk, i_reset, i_we, i_addr, i_data, i_dbg_addr, o_data, o_dbg_data);
+
+        task clock;
+	    begin
+		    i_clk = 0; #10; i_clk = 1; #10;
+	    end
+        endtask
+
+        initial begin
+            i_reset = 1;
+            i_we = 0;
+
+            i_we = 1;
+            i_addr = 'h00;
+            i_data = 'hdead_beef;
+            i_dbg_addr = 'h00; 
+
+            clock(); 
+            assert (o_dbg_data == 0);
+
+            i_reset = 0;
+            clock(); 
+            assert (o_dbg_data == 'hdead_beef);
+
+            i_addr = 'h04;
+            i_data = 'hdead_c0de;    
+            i_dbg_addr = 'h04; 
+            clock(); 
+            assert (o_dbg_data == 'hdead_c0de);
+            assert (o_data == 'hdead_c0de);
+            i_addr = 'h00;
+            i_dbg_addr = 'h08;
+            #1; // just to progress time
+            assert (o_data == 'hdead_beef);
+            assert (o_dbg_data == 0);
+
+            i_reset = 1;
+            #1; // just to progress time
+            
+            clock(); 
+            assert (o_data == 0);
+            assert (o_dbg_data == 0);
+
+
+            $finish;
+        end
+    endmodule
+}}}
