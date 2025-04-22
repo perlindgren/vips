@@ -16,7 +16,7 @@ module Vips1 (
 
     var instr: logic<32>;
 
-    inst instr_mem: InstrMem (
+    inst instr_mem: InstrMem1 (
         i_addr : pc_addr,
         o_instr: instr  ,
     );

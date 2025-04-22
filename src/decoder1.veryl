@@ -1,0 +1,208 @@
+// src/decoder1.veryl
+
+// support for
+// ADD, ADDI, SUB, SLT, SLTI, AND, OR
+//
+// [31..26]              [5..0]     sub  op s_ext w_reg d_reg
+// -------------------------------- ---  -- ----- ----- -----
+// 00_1100                     ANDI  x   00  x      1     1
+// 00_1101                     ORI   x   01  x      1     1
+// 00_1000                     ADDI  0   10  x      1     1
+// 00_1010                     SLTI  0   11  x      1     1
+
+// 000000              10_0100 AND   x   00  0      1     0
+// 000000              10_0101 OR    x   01  0      1     0
+// 000000              10_0000 ADD   0   10  1      1     0
+// 000000              10_0010 SUB   1   10  1      1     0
+// 000000              10_1010 SLT   1   11  1      1     0
+
+// AluOp
+// 00 AND
+// 01 OR
+// 10 Arith
+// 11 Neg
+
+// AluSource
+// 0 reg
+// 1 imm
+
+module Decoder1 (
+    opcode         : input  logic<6>,
+    funct          : input  logic<6>,
+    z              : input  logic   ,
+    reg_destination: output logic   ,
+    write_enable   : output logic   ,
+    sign_extend    : output logic   ,
+    alu_source     : output logic   ,
+    alu_sub        : output logic   ,
+    alu_op         : output logic<2>,
+) {
+    always_comb {
+
+        case opcode {
+            // andi
+            6'b00_1100: {
+                            reg_destination = 0;
+                            write_enable    = 1;
+                            sign_extend     = 0;
+                            alu_source      = 1;
+                            alu_sub         = 0;
+                            alu_op          = 2'b00;
+                        }
+                        // ori
+            6'b00_1101: {
+                            reg_destination = 0;
+                            write_enable    = 1;
+                            sign_extend     = 0;
+                            alu_source      = 1;
+                            alu_sub         = 0;
+                            alu_op          = 2'b01;
+                        }
+                        // addi
+            6'b00_1000: {
+                            reg_destination = 0;
+                            write_enable    = 1;
+                            sign_extend     = 1;
+                            alu_source      = 1;
+                            alu_sub         = 0;
+                            alu_op          = 2'b10;
+                        }
+                        // slti
+            6'b00_1010: {
+                            reg_destination = 0;
+                            write_enable    = 1;
+                            sign_extend     = 1;
+                            alu_source      = 1;
+                            alu_sub         = 1;
+                            alu_op          = 2'b11;
+                        }
+                        // R-type
+            6'b00_0000: {
+                            reg_destination = 1;
+                            write_enable    = 1;
+                            alu_source      = 0;
+                            sign_extend     = 0;
+                            alu_sub         = funct[1];
+                            case funct {
+                                // and
+                                6'b10_0100: {
+                                    alu_op = 2'b00;
+                                }
+                                // or
+                                6'b10_0101: {
+                                    alu_op = 2'b01;
+
+                                }
+                                // add
+                                6'b10_0000: {
+                                    alu_op = 2'b10;
+                                }
+                                // sub
+                                6'b10_0010: {
+                                    alu_op = 2'b10;
+                                }
+                                // slt
+                                6'b10_1010: {
+                                    alu_op = 2'b11;
+                                }
+
+                                default: {
+                                 write_enable = 0;
+                                 alu_source   = 0; // don't care
+                                 alu_sub      = 0; // don't care
+                                 alu_op       = 2'b00; // don't care
+                             }
+                            }
+                        }
+
+            default: {
+                         write_enable    = 0;
+                         reg_destination = 0; // don't care
+                         sign_extend     = 0; // don't care
+                         alu_source      = 0; // don't care
+                         alu_sub         = 0; // don't care
+                         alu_op          = 2'b00; // don't care
+                     }
+        }
+    }
+}
+
+#[test(decoder1)]
+embed (inline) sv{{{
+    module test;
+        logic [5:0] opcode;
+        logic [5:0] funct;
+        logic z;
+        logic reg_destination;
+        logic write_enable;
+        logic sign_extend;
+        logic alu_source;
+        logic alu_sub;
+        logic [1:0] alu_op; 
+
+        vips_Decoder1 decoder(
+            opcode,
+            funct,
+            z,
+            reg_destination,
+            write_enable,
+            sign_extend,
+            alu_source,
+            alu_sub,
+            alu_op
+        );
+
+        initial begin
+            // test I type
+            // andi
+            opcode = 6'b00_1100;
+            #10;
+
+            // ori
+            opcode = 6'b00_1101;
+            #10;
+
+            // addi
+            opcode = 6'b00_1000;
+            #10;
+
+            // slt 
+            opcode = 6'b00_1010; 
+            #10;
+
+            // test R type
+            opcode = 0;
+
+            // and
+            funct = 6'b10_0100;
+            #10;
+
+            // or
+            funct = 6'b10_0101;
+            #10;
+
+            // add
+            funct = 6'b10_0000;
+            #10;
+
+            // sub
+            funct = 6'b10_0010;
+            #10;
+                                
+            // slt
+            funct = 6'b10_1010;
+            #10;
+
+            // nor 
+            opcode = 6'b00_0000;
+            funct = 6'b10_0111;
+            #10;
+
+            // lui 
+            opcode = 6'b11_1111;
+            #10;
+
+            $finish;
+        end
+    endmodule
+}}}

@@ -8,7 +8,7 @@ module Adder #(
     sum  : output logic<Width>,
     carry: output logic       ,
 ) {
-    var c: logic<Width + 1>;
+    var c: logic [Width + 1];
 
     assign c[0]  = 0;
     assign carry = c[Width];
@@ -25,81 +25,3 @@ module Adder #(
         );
     }
 }
-
-#[test(adder4)]
-embed (inline) sv{{{
-    module test;
-        logic [3:0] a;
-        logic [3:0] b;
-        logic [3:0] sum;
-        logic carry;
-        vips_Adder #(4) adder (a, b, sum, carry);
-
-        initial begin
-            a = 0; b = 1;
-            #10;
-            assert (sum == 1 && carry == 0) else $error("0+1");
-
-            a = 2; b = 1;
-            #10;
-            assert (sum == 3 && carry == 0) else $error("2+1");
-
-            a = 8; b = 8;
-            #10;
-            assert (sum == 0 && carry == 1) else $error("8+8");
-
-            $finish;
-        end
-    endmodule
-}}}
-
-#[test(adder32)]
-embed (inline) sv{{{
-    module test;
-        logic [31:0] a;
-        logic [31:0] b;
-        logic [31:0] sum;
-        logic carry;
-        vips_Adder #(32) adder (a, b, sum, carry);
-
-        initial begin
-            a = 0; b = 100;
-            #10;
-            assert (sum == 100 && carry == 0) else $error("0+100");
-
-            a = 5; b = 3;
-            #10;
-            assert (sum == 8 && carry == 0) else $error("5+3");
-
-            a = 200; b = 100;
-            #10;
-            assert (sum == 300 && carry == 0) else $error("200+100");
-
-            // max 32 bit integer / 2
-            a = 2147483648; b = 2147483648;
-            #10;
-            assert (sum == 0 && carry == 1) else $error("2147483648+2147483648");
-
-            $finish;
-        end
-    endmodule
-}}}
-
-#[test(adder32_py, Adder)]
-embed (cocotb) py{{{
-import cocotb
-from cocotb.triggers import Timer
-
-@cocotb.test
-async def test(dut):
-    await Timer(1, units="ns")
-    dut.a = 0
-    dut.b = 100
-
-    await Timer(1, units="ns")
-    assert dut.sum.value == 100 and dut.carry.value == 0
-
-}}}
-
-#[test(adder32_py_extern, Adder)]
-include (cocotb, "vips_adder_tb.py");

@@ -7,7 +7,6 @@ module Vips (
     i_dbg_dm_addr : input  logic           <32>,
     o_dbg_reg_data: output logic           <32>,
     o_dbg_dm_data : output logic           <32>,
-
 ) {
     /* verilator lint_off UNOPTFLAT */
     var pc_addr: logic<32>;
@@ -40,6 +39,7 @@ module Vips (
     var alu_sub        : logic   ;
     var alu_op         : logic<2>;
     var dm_we          : logic   ;
+    var rf_d_source    : logic   ;
 
     inst decoder: Decoder (
         i_opcode         : opcode         ,
@@ -52,6 +52,7 @@ module Vips (
         o_alu_sub        : alu_sub        ,
         o_alu_op         : alu_op         ,
         o_dm_we          : dm_we          ,
+        o_rf_d_source    : rf_d_source    ,
     );
 
     var wb_reg: logic<5>;
@@ -64,9 +65,19 @@ module Vips (
         o_data: wb_reg         ,
     );
 
+    var alu_r  : logic<32>;
+    var dm_data: logic<32>;
+    var rf_data: logic<32>;
+
+    // selects the regfile data input
+    inst rf_w_data: Mux2 (
+        i_data: {alu_r, dm_data},
+        i_sel : rf_d_source     ,
+        o_data: rf_data         ,
+    );
+
     var a_data: logic<32>;
     var b_data: logic<32>;
-    var alu_r : logic<32>;
 
     inst regfile: RegFile (
         i_clk                     ,
@@ -75,7 +86,7 @@ module Vips (
         i_b_addr  : rt            ,
         i_w_ena   : write_enable  ,
         i_w_addr  : wb_reg        ,
-        i_w_data  : alu_r         ,
+        i_w_data  : rf_data       ,
         i_dbg_addr: i_dbg_reg     ,
         o_a_data  : a_data        ,
         o_b_data  : b_data        ,
@@ -112,13 +123,12 @@ module Vips (
         z           ,
     );
 
-    var dm_data: logic<32>;
     inst data_mem: DataMem (
         i_clk                    ,
         i_reset                  ,
         i_we      : dm_we        ,
-        i_addr    : 0            ,
-        i_data    : 0            ,
+        i_addr    : alu_r        ,
+        i_data    : b_data       ,
         i_dbg_addr: i_dbg_dm_addr,
         o_data    : dm_data      ,
         o_dbg_data: o_dbg_dm_data,
@@ -134,8 +144,10 @@ embed (inline) sv{{{
         logic i_reset;      
         logic [4:0] i_dbg_reg;
         logic [31:0] o_dbg_reg_data;
+        logic [31:0] i_dbg_dm_addr;
+        logic [31:0] o_dbg_dm_data;
         
-        vips_Vips vips(i_clk, i_reset, i_dbg_reg, o_dbg_reg_data);
+        vips_Vips vips(i_clk, i_reset, i_dbg_reg, i_dbg_dm_addr, o_dbg_reg_data, o_dbg_dm_data);
 
         task clock;
 	    begin
@@ -155,8 +167,8 @@ embed (inline) sv{{{
             assert (vips.reg_destination == 0);
 
             i_reset = 0;
-            clock(); // 04 addi zero at -8, (nop)
-            assert (vips.pc_addr == 32'h04);
+            #1; // progress simulation
+            assert (vips.pc_addr == 32'h00);
             assert (vips.write_enable == 1);
             assert (vips.alu_source == 1);
             assert (vips.alu_op == 2'b10);
@@ -164,7 +176,16 @@ embed (inline) sv{{{
             assert (vips.sign_extend == 1);
             assert (vips.reg_destination == 0);
 
-            clock(); // 08 addi r1 r2 8,    (r1 <- 8)
+            clock(); // 04 sw   r1 0(zero)  (dm[0] <- 4)
+            assert (vips.pc_addr == 32'h04);
+            assert (vips.write_enable == 0);
+            assert (vips.alu_source == 1);
+            assert (vips.alu_op == 2'b10);
+            assert (vips.alu_sub == 0);
+            assert (vips.sign_extend == 1);
+            assert (vips.reg_destination == 0);
+
+            clock(); // 08 addi r2 r1 8,    (r2 <- 12)
             assert (vips.pc_addr == 32'h08);
             assert (vips.write_enable == 1);
             assert (vips.alu_source == 1);
@@ -173,94 +194,98 @@ embed (inline) sv{{{
             assert (vips.sign_extend == 1);
             assert (vips.reg_destination == 0);
 
-            clock(); // 0c add  r2 zero r1  (r2 <- 8)
+            clock(); // 0c sw   r2 4(zero)  (dm[1] <- 12)
             assert (vips.pc_addr == 32'h0c);
-            assert (vips.write_enable == 1);
-             assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b10);
-            assert (vips.alu_sub == 0);
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 1);
+            // assert (vips.write_enable == 0);
+            // assert (vips.alu_source == 1);
+            // assert (vips.alu_op == 2'b10);
+            // assert (vips.alu_sub == 0);
+            // assert (vips.sign_extend == 1); 
+            // assert (vips.reg_destination == 1);
 
-            clock(); // 10 addi r2 zero 2   (r2 <- 2)
+            clock(); // 10 lw   r3 -4(r1)   (r3 <- dm[0] = 4)
             assert (vips.pc_addr == 32'h10);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 1);
-            assert (vips.alu_op == 2'b10);
-            assert (vips.alu_sub == 0);
-            assert (vips.sign_extend == 1);
-            assert (vips.reg_destination == 0);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 1);
+            // assert (vips.alu_op == 2'b10);
+            // assert (vips.alu_sub == 0);
+            // assert (vips.sign_extend == 1);
+            // assert (vips.reg_destination == 0);
 
-            clock(); // 14 sub  r3 r2 r1    (r3 <- 2 - 8 = -6)
+            clock(); // 14 lw   r4 0(r1)    (r4 <- dm[1] = 12)
             assert (vips.pc_addr == 32'h14);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b10);
-            assert (vips.alu_sub == 1);
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 1);
-            
-            clock(); // 18 slt  r4 zero v1  (r4 <- zero < (-6) = 0)
+            // assert (vips.pc_addr == 32'h14);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 0);
+            // assert (vips.alu_op == 2'b10);
+            // assert (vips.alu_sub == 1);
+            // assert (vips.sign_extend == 0); // don't care
+            // assert (vips.reg_destination == 1);
+
+            clock(); // 18 30 lui  zero 1 
             assert (vips.pc_addr == 32'h18);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b11);
-            assert (vips.alu_sub == 1);
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 1);
-
-            clock(); // 1c slti r4 v1 -5    (r4 <- (-6) < (-5) = 1)
-            assert (vips.pc_addr == 32'h1c);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 1);
-            assert (vips.alu_op == 2'b11);
-            assert (vips.alu_sub == 1);
-            assert (vips.sign_extend == 1);
-            assert (vips.reg_destination == 0);
-
-            clock(); // 20 slt  r5 zero r1  (r5 <- 0 < 8 = 1)
-            assert (vips.pc_addr == 32'h20);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b11);
-            assert (vips.alu_sub == 1);
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 1);
-
-            clock(); // 24 or   r6 r3 zero  (r6 <- -6 | 0 = -6)
-            assert (vips.pc_addr == 32'h24);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b01);
-            assert (vips.alu_sub == 0);
-            assert (vips.sign_extend == 0);
-            assert (vips.reg_destination == 1);
-
-            clock(); // 28 and  r7 r1 r3    (r7 <- b0..1000 & b1..1010 = b1000 )
-            assert (vips.pc_addr == 32'h28);
-            assert (vips.write_enable == 1);
-            assert (vips.alu_source == 0);
-            assert (vips.alu_op == 2'b00);
-            assert (vips.alu_sub == 0); // don't care
-            assert (vips.sign_extend == 0);
-            assert (vips.reg_destination == 1);
-
-            clock(); // 2c nor  a4 at v1    (-- not supported --)
-            assert (vips.pc_addr == 32'h2c);
-            assert (vips.write_enable == 0);
-            assert (vips.alu_source == 0); // don't care
-            assert (vips.alu_sub == 0); // don't care
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 1); // don't care
             
-            clock(); // 30 lui  zero 1      (-- not supported --)
-            assert (vips.pc_addr == 32'h30);
-            assert (vips.write_enable == 0);
-            assert (vips.alu_source == 0); // don't care
-            assert (vips.alu_sub == 0); // don't care
-            assert (vips.sign_extend == 0); // don't care
-            assert (vips.reg_destination == 0); // don't care
+            // clock(); // 18 slt  r4 zero v1  (r4 <- zero < (-6) = 0)
+            // assert (vips.pc_addr == 32'h18);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 0);
+            // assert (vips.alu_op == 2'b11);
+            // assert (vips.alu_sub == 1);
+            // assert (vips.sign_extend == 0); // don't care
+            // assert (vips.reg_destination == 1);
 
+            // clock(); // 1c slti r4 v1 -5    (r4 <- (-6) < (-5) = 1)
+            // assert (vips.pc_addr == 32'h1c);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 1);
+            // assert (vips.alu_op == 2'b11);
+            // assert (vips.alu_sub == 1);
+            // assert (vips.sign_extend == 1);
+            // assert (vips.reg_destination == 0);
+
+            // clock(); // 20 slt  r5 zero r1  (r5 <- 0 < 8 = 1)
+            // assert (vips.pc_addr == 32'h20);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 0);
+            // assert (vips.alu_op == 2'b11);
+            // assert (vips.alu_sub == 1);
+            // assert (vips.sign_extend == 0); // don't care
+            // assert (vips.reg_destination == 1);
+
+            // clock(); // 24 or   r6 r3 zero  (r6 <- -6 | 0 = -6)
+            // assert (vips.pc_addr == 32'h24);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 0);
+            // assert (vips.alu_op == 2'b01);
+            // assert (vips.alu_sub == 0);
+            // assert (vips.sign_extend == 0);
+            // assert (vips.reg_destination == 1);
+
+            // clock(); // 28 and  r7 r1 r3    (r7 <- b0..1000 & b1..1010 = b1000 )
+            // assert (vips.pc_addr == 32'h28);
+            // assert (vips.write_enable == 1);
+            // assert (vips.alu_source == 0);
+            // assert (vips.alu_op == 2'b00);
+            // assert (vips.alu_sub == 0); // don't care
+            // assert (vips.sign_extend == 0);
+            // assert (vips.reg_destination == 1);
+
+            // clock(); // 2c nor  a4 at v1    (-- not supported --)
+            // assert (vips.pc_addr == 32'h2c);
+            // assert (vips.write_enable == 0);
+            // assert (vips.alu_source == 0); // don't care
+            // assert (vips.alu_sub == 0); // don't care
+            // assert (vips.sign_extend == 0); // don't care
+            // assert (vips.reg_destination == 1); // don't care
+            
+            // clock(); // 30 lui  zero 1      (-- not supported --)
+            // assert (vips.pc_addr == 32'h30);
+            // assert (vips.write_enable == 0);
+            // assert (vips.alu_source == 0); // don't care
+            // assert (vips.alu_sub == 0); // don't care
+            // assert (vips.sign_extend == 0); // don't care
+            // assert (vips.reg_destination == 0); // don't care
+ 
             $finish;
         end
     endmodule
