@@ -3,20 +3,22 @@
 // support for
 // ADD, ADDI, SUB, SLT, SLTI, AND, OR, LW, SW
 //
-// [31..26]     [5..0]              sub  op alu_src s_ext rf_we dm_we  r_src d_src
-// -------------------------------- ---  -- ------- ----- ----- -----  ----- -----
-// 00_1100 (0x0c)              ANDI  x   00    1      0     1     0      1     0
-// 00_1101 (0x0d)              ORI   x   01    1      0     1     0      1     0
-// 00_1000 (0x08)              ADDI  0   10    1      1     1     0      1     0
-// 00_1010 (0x0a)              SLTI  1   11    1      1     1     0      1     0
-// 10_0011 (0x23)              LW    0   10    1      1     1     0      1     1
-// 10_1011 (0x2b)              SW    0   10    1      1     x     1      1     x
-
-// 000000       10_0100 (0x24) AND   x   00    0      x     1     0      0     0
-// 000000       10_0101 (0x25) OR    x   01    0      x     1     0      0     0
-// 000000       10_0000 (0x20) ADD   0   10    0      x     1     0      0     0
-// 000000       10_0010 (0x22) SUB   1   10    0      x     1     0      0     0
-// 000000       10_1010 (0x2a) SLT   1   11    0      x     1     0      0     0
+// [31..26]     [5..0]              sub  op alu_b_sel s_ext rf_we dm_we  w_reg_sel d_sel
+// -------------------------------- ---  -- --------- ----- ----- -----  --------- -----
+// 00_1100 (0x0c)              ANDI  x   00     1       0     1     0         1      0
+// 00_1101 (0x0d)              ORI   x   01     1       0     1     0         1      0
+// 00_1000 (0x08)              ADDI  0   10     1       1     1     0         1      0
+// 00_1010 (0x0a)              SLTI  1   11     1       1     1     0         1      0
+// 10_0011 (0x23)              LW    0   10     1       1     1     0         1      1
+// 10_1011 (0x2b)              SW    0   10     1       1     x     1         1      x
+// 00_0100 (0x04)              BEQ   x   xx     x       1     0     0         x      x
+// 00_0101 (0x05)              BNE   x   xx     x       1     0     0         x      x
+//
+// 000000       10_0100 (0x24) AND   x   00     0       x     1     0         0      0
+// 000000       10_0101 (0x25) OR    x   01     0       x     1     0         0      0
+// 000000       10_0000 (0x20) ADD   0   10     0       x     1     0         0      0
+// 000000       10_0010 (0x22) SUB   1   10     0       x     1     0         0      0
+// 000000       10_1010 (0x2a) SLT   1   11     0       x     1     0         0      0
 
 // sub AluSub
 // 0 Additon
@@ -28,7 +30,7 @@
 // 10 Arith
 // 11 Neg
 
-// alu_src AluSource
+// alu_b_sel AluSource
 // 0 reg b
 // 1 imm
 
@@ -44,26 +46,34 @@
 // 0 disable
 // 1 enable
 
-// r_src reg_destination
+// w_reg_sel RegDestination
 // 0 rt
 // 1 rd
 
-// d_src data to register file
+// d_sel alu or data datat memory
 // 0 alu
 // 1 dm
 
+// pc_sel address to pc_register
+// 00 pc + 4
+// 01 jr register
+// 10 relative branch
+// 11 j immediate
+
 module Decoder (
-    i_opcode         : input  logic<6>,
-    i_funct          : input  logic<6>,
-    i_z              : input  logic   ,
-    o_reg_destination: output logic   ,
-    o_write_enable   : output logic   ,
-    o_sign_extend    : output logic   ,
-    o_alu_source     : output logic   ,
-    o_alu_sub        : output logic   ,
-    o_alu_op         : output logic<2>,
-    o_dm_we          : output logic   ,
-    o_rf_d_source    : output logic   ,
+    i_opcode      : input  logic<6>,
+    i_funct       : input  logic<6>,
+    i_z           : input  logic   ,
+    i_eq          : input  logic   ,
+    o_w_reg_sel   : output logic   ,
+    o_rf_we       : output logic   ,
+    o_imm_sign_ext: output logic   ,
+    o_alu_b_sel   : output logic   ,
+    o_alu_sub     : output logic   ,
+    o_alu_op      : output logic<2>,
+    o_dm_we       : output logic   ,
+    o_d_sel       : output logic   ,
+    o_pc_sel      : output logic<2>,
 ) {
     always_comb {
 
@@ -71,79 +81,109 @@ module Decoder (
             // I type instructions
             //          andi (0c)
             6'b00_1100: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 1;
-                            o_sign_extend     = 0;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 0;
-                            o_alu_op          = 2'b00; // and
-                            o_dm_we           = 0;
-                            o_rf_d_source     = 0;
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 1;
+                            o_imm_sign_ext = 0;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b00; // and
+                            o_dm_we        = 0;
+                            o_d_sel        = 0;
+                            o_pc_sel       = 2'b00; // pc + 4
                         }
                         // ori (0d)
             6'b00_1101: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 1;
-                            o_sign_extend     = 0;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 0;
-                            o_alu_op          = 2'b01; // or
-                            o_dm_we           = 0;
-                            o_rf_d_source     = 0;
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 1;
+                            o_imm_sign_ext = 0;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b01; // or
+                            o_dm_we        = 0;
+                            o_d_sel        = 0;
+                            o_pc_sel       = 2'b00; // pc + 4
                         }
                         // addi (08)
             6'b00_1000: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 1;
-                            o_sign_extend     = 1;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 0;
-                            o_alu_op          = 2'b10; // arith
-                            o_dm_we           = 0;
-                            o_rf_d_source     = 0;
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 1;
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b10; // arith
+                            o_dm_we        = 0;
+                            o_d_sel        = 0;
+                            o_pc_sel       = 2'b00; // pc + 4
                         }
                         // slti (0a)
             6'b00_1010: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 1;
-                            o_sign_extend     = 1;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 1;
-                            o_alu_op          = 2'b11; // slt
-                            o_dm_we           = 0;
-                            o_rf_d_source     = 0;
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 1;
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 1;
+                            o_alu_op       = 2'b11; // slt
+                            o_dm_we        = 0;
+                            o_d_sel        = 0;
+                            o_pc_sel       = 2'b00; // pc + 4
                         }
                         // lw (23)
             6'b10_0011: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 1;
-                            o_sign_extend     = 1;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 0;
-                            o_alu_op          = 2'b10; // arith
-                            o_dm_we           = 0;
-                            o_rf_d_source     = 1;
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 1;
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b10; // arith
+                            o_dm_we        = 0;
+                            o_d_sel        = 1; // selects data memory
+                            o_pc_sel       = 2'b00; // pc + 4
                         }
                         // sw (2b)
             6'b10_1011: {
-                            o_reg_destination = 0; // rt
-                            o_write_enable    = 0; // no write to register file
-                            o_sign_extend     = 1;
-                            o_alu_source      = 1;
-                            o_alu_sub         = 0;
-                            o_alu_op          = 2'b10; // arith
-                            o_dm_we           = 1;
-                            o_rf_d_source     = 0; // don't care
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 0; // no write to register file
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b10; // arith
+                            o_dm_we        = 1;
+                            o_d_sel        = 0; // don't care
+                            o_pc_sel       = 2'b00; // pc + 4
+                        }
+                        // beq (04)
+            6'b00_0100: {
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 0; // no write to register file
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b10; // arith
+                            o_dm_we        = 1;
+                            o_d_sel        = 0; // don't care
+                            o_pc_sel       = if i_eq ? 2'b10 : 2'b00; // branch else pc + 4
+                        }
+            6'b00_0101: {
+                            o_w_reg_sel    = 0; // rt
+                            o_rf_we        = 0; // no write to register file
+                            o_imm_sign_ext = 1;
+                            o_alu_b_sel    = 1;
+                            o_alu_sub      = 0;
+                            o_alu_op       = 2'b10; // arith
+                            o_dm_we        = 1;
+                            o_d_sel        = 0; // don't care
+                            o_pc_sel       = if i_eq ? 2'b00 : 2'b10; // pc + 4 else branch
                         }
                         // R-type
             6'b00_0000: {
-                            o_reg_destination = 1;
-                            o_write_enable    = 1;
-                            o_alu_source      = 0;
-                            o_sign_extend     = 0;
-                            o_dm_we           = 0; // no write to data memory
-                            o_rf_d_source     = 0; // alu result
-                            o_alu_sub         = i_funct[1];
+                            o_w_reg_sel    = 1;
+                            o_rf_we        = 1;
+                            o_alu_b_sel    = 0;
+                            o_imm_sign_ext = 0; // don't care
+                            o_dm_we        = 0; // no write to data memory
+                            o_d_sel        = 0; // alu result
+                            o_alu_sub      = i_funct[1];
+                            o_pc_sel       = 2'b00; // pc + 4
                             case i_funct {
                                 // and
                                 6'b10_0100: {
@@ -167,23 +207,24 @@ module Decoder (
                                 }
 
                                 default: {
-                                 o_write_enable = 0;
-                                 o_alu_source   = 0; // don't care
-                                 o_alu_sub      = 0; // don't care
-                                 o_alu_op       = 2'b00; // don't care
+                                 o_rf_we     = 0;
+                                 o_alu_b_sel = 0; // don't care
+                                 o_alu_sub   = 0; // don't care
+                                 o_alu_op    = 2'b00; // don't care
                              }
                             }
                         }
 
             default: {
-                         o_write_enable    = 0;
-                         o_reg_destination = 0; // don't care
-                         o_sign_extend     = 0; // don't care
-                         o_alu_source      = 0; // don't care
-                         o_alu_sub         = 0; // don't care
-                         o_alu_op          = 2'b00; // don't care
-                         o_dm_we           = 0;
-                         o_rf_d_source     = 0; // don't care
+                         o_rf_we        = 0;
+                         o_w_reg_sel    = 0; // don't care
+                         o_imm_sign_ext = 0; // don't care
+                         o_alu_b_sel    = 0; // don't care
+                         o_alu_sub      = 0; // don't care
+                         o_alu_op       = 2'b00; // don't care
+                         o_dm_we        = 0;
+                         o_d_sel        = 0; // don't care
+                         o_pc_sel       = 2'b00; // pc + 4
                      }
         }
     }
@@ -195,6 +236,7 @@ embed (inline) sv{{{
         logic [5:0] opcode;
         logic [5:0] funct;
         logic z;
+        logic eq;
         logic reg_destination;
         logic write_enable;
         logic sign_extend;
@@ -208,6 +250,7 @@ embed (inline) sv{{{
             opcode,
             funct,
             z,
+            eq,
             reg_destination,
             write_enable,
             sign_extend,
@@ -215,7 +258,8 @@ embed (inline) sv{{{
             alu_sub,
             alu_op,
             dm_we,
-            rf_d_src
+            rf_d_src,
+
         );
 
         initial begin
