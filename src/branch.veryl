@@ -1,0 +1,9 @@
+// src/branch.veryl
+
+module Branch (
+    i_a : input  logic<32>,
+    i_b : input  logic<32>,
+    o_eq: output logic    ,
+) {
+    assign o_eq = i_a == i_b;
+}

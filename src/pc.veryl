@@ -1,0 +1,54 @@
+// src/pc_plus4.veryl
+
+module Pc (
+    i_clk  : input  clock               ,
+    i_reset: input  reset_async_high    ,
+    i_pc   : input  logic           <32>,
+    o_pc   : output logic           <32>,
+) {
+    var pc: logic<32>;
+
+    always_ff (i_clk, i_reset) {
+        if_reset {
+            pc = 0;
+        } else {
+            pc = i_pc;
+        }
+
+    }
+    assign o_pc = pc;
+}
+
+#[test(pc)]
+embed (inline) sv{{{
+    module test;
+        logic clk;
+        logic reset;
+        logic [31:0] i_pc;
+        logic [31:0] o_pc;
+
+        assign i_pc = o_pc + 4; // native System Verilog adder
+
+        vips_Pc pc (clk, reset, i_pc, o_pc);
+
+        initial begin
+            reset = 1;
+            assert (o_pc == 0) else $error("reset");
+
+            clk = 0; #10 clk = 1; #10;
+            assert (o_pc == 0) else $error("0");
+
+            reset = 0;
+            clk = 0; #10 clk = 1; #10;
+            assert (o_pc == 4) else $error("4");
+
+            clk = 0; #10 clk = 1; #10;
+            assert (o_pc == 8) else $error("8");
+
+            clk = 0; #10 clk = 1; #10;
+            assert (o_pc == 12) else $error("12");
+
+            $finish;
+        end
+    endmodule
+}}}
