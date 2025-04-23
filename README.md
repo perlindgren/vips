@@ -152,6 +152,15 @@ The VIPS support a subset of the MIPS32 ISA:
 
 ![image](images/decoder.svg)
 
+## Simple Vips
+
+![image](images/vips.svg)
+
+## Full Vips
+
+![image](images/vips_full.svg)
+
+
 ## List of current tests
 
 For now using the explicit syntax for declaring dependencies.
