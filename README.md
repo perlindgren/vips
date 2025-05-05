@@ -136,27 +136,73 @@ The Alu has the `sub` and `op` inputs defined as follows:
 
 ### Decoder
 
-The VIPS support a subset of the MIPS32 ISA:
+The VIPS support a subset of the MIPS32 ISA. We can capture the control logic for the supported arithmetic operations in the below table:
 
-| Operation | `rf_we` | `wb_reg` | `sub` | `op`  | `alu_src` | `sign_ext` |
-| --------- | :-----: | :------: | :---: | :---: | :-------: | :--------: |
-| and       |    1    |    1     |   0   |  00   |     0     |     x      |
-| or        |    1    |    1     |   0   |  01   |     0     |     x      |
-| add       |    1    |    1     |   0   |  10   |     0     |     x      |
-| sub       |    1    |    1     |   1   |  10   |     0     |     x      |
-| slt       |    1    |    1     |   1   |  11   |     0     |     x      |
-| andi      |    1    |    0     |   0   |  00   |     1     |     0      |
-| ori       |    1    |    0     |   0   |  01   |     1     |     0      |
-| addi      |    1    |    0     |   0   |  10   |     1     |     1      |
-| slti      |    1    |    0     |   1   |  11   |     1     |     1      |
+| Operation | `rf_we` | `w_reg_sel` | `sub` | `op`  | `alu_b_sel` | `sign_ext` |
+| --------- | :-----: | :---------: | :---: | :---: | :---------: | :--------: |
+| and       |    1    |      1      |   0   |  00   |      0      |     x      |
+| or        |    1    |      1      |   0   |  01   |      0      |     x      |
+| add       |    1    |      1      |   0   |  10   |      0      |     x      |
+| sub       |    1    |      1      |   1   |  10   |      0      |     x      |
+| slt       |    1    |      1      |   1   |  11   |      0      |     x      |
+| andi      |    1    |      0      |   0   |  00   |      1      |     0      |
+| ori       |    1    |      0      |   0   |  01   |      1      |     0      |
+| addi      |    1    |      0      |   0   |  10   |      1      |     1      |
+| slti      |    1    |      0      |   1   |  11   |      1      |     1      |
+
 
 ![image](images/vips_no_branch.svg)
 
 ## Simple Vips
 
+Adding control logic for branches.
+
+| Operation | `rf_we` | `w_reg_sel` | `sub` | `op`  | `alu_b_sel` | `sign_ext` | `pc_sel` |
+| --------- | :-----: | :---------: | :---: | :---: | :---------: | :--------: | :------: |
+| and       |    1    |      1      |   0   |  00   |      0      |     x      |    00    |
+| or        |    1    |      1      |   0   |  01   |      0      |     x      |    00    |
+| add       |    1    |      1      |   0   |  10   |      0      |     x      |    00    |
+| sub       |    1    |      1      |   1   |  10   |      0      |     x      |    00    |
+| slt       |    1    |      1      |   1   |  11   |      0      |     x      |    00    |
+| andi      |    1    |      0      |   0   |  00   |      1      |     0      |    00    |
+| ori       |    1    |      0      |   0   |  01   |      1      |     0      |    00    |
+| addi      |    1    |      0      |   0   |  10   |      1      |     1      |    00    |
+| slti      |    1    |      0      |   1   |  11   |      1      |     1      |    00    |
+| jr        |    0    |      0      |   0   |  10   |      0      |     x      |    01    |
+| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |
+| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |
+| j         |    0    |      0      |   x   |  xx   |      x      |     1      |    11    |
+
+The branch target for the relative branches (`beq` and `bne`) is computed by a seprate adder (not by the Alu). This decision allows the Alu to compute return address for function calls in the real MIPS.
+
+Notice, for generating the `pc_sel` signal we need to take into accunt the `eq` input (`a_data` == `b_data`).
+The `jr` instruction assumes the `rt` field to be `zero` and adds that (0) to the `rs` field. The real MIPS has a special ALU opcode for just passing the `rs` field, so here we break a bit with the MIPS specification.
+
 ![image](images/vips_simple.svg)
 
 ## Full Vips
+
+The Full Vips adds support for word sized access to data memory.
+
+| Operation | `rf_we` | `w_reg_sel` | `sub` | `op`  | `alu_b_sel` | `sign_ext` | `pc_sel` | `d_sel` |
+| --------- | :-----: | :---------: | :---: | :---: | :---------: | :--------: | :------: | :-----: |
+| and       |    1    |      1      |   0   |  00   |      0      |     x      |    00    |    0    |
+| or        |    1    |      1      |   0   |  01   |      0      |     x      |    00    |    0    |
+| add       |    1    |      1      |   0   |  10   |      0      |     x      |    00    |    0    |
+| sub       |    1    |      1      |   1   |  10   |      0      |     x      |    00    |    0    |
+| slt       |    1    |      1      |   1   |  11   |      0      |     x      |    00    |    0    |
+| andi      |    1    |      0      |   0   |  00   |      1      |     0      |    00    |    0    |
+| ori       |    1    |      0      |   0   |  01   |      1      |     0      |    00    |    0    |
+| addi      |    1    |      0      |   0   |  10   |      1      |     1      |    00    |    0    |
+| slti      |    1    |      0      |   1   |  11   |      1      |     1      |    00    |    0    |
+| jr        |    0    |      0      |   0   |  10   |      0      |     x      |    01    |    x    |
+| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |    x    |
+| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |    x    |
+| j         |    0    |      0      |   x   |  xx   |      x      |     x      |    11    |    x    |
+| lw        |    1    |      0      |   0   |  10   |      1      |     1      |    00    |    1    |
+| sw        |    0    |      0      |   0   |  10   |      1      |     1      |    00    |    x    |
+
+The load and store instructions computes the effective address using the Alu (`rs` + sig_ext(`imm`)). The data to store comes from the `rt` field (`b_data`).
 
 ![image](images/vips_full.svg)
 
