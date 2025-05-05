@@ -150,11 +150,11 @@ The VIPS support a subset of the MIPS32 ISA:
 | addi      |    1    |    0     |   0   |  10   |     1     |     1      |
 | slti      |    1    |    0     |   1   |  11   |     1     |     1      |
 
-![image](images/decoder.svg)
+![image](images/vips_no_branch.svg)
 
 ## Simple Vips
 
-![image](images/vips.svg)
+![image](images/vips_simple.svg)
 
 ## Full Vips
 
