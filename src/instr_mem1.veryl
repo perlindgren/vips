@@ -27,7 +27,7 @@ embed (inline) sv{{{
         logic [31:0] addr;
         logic [31:0] instr;
 
-        vips_InstrMem instr_mem(addr, instr);
+        vips_InstrMem1 instr_mem(addr, instr);
 
         logic [5:0] op;
         logic [5:0] funct;

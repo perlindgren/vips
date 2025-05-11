@@ -11,15 +11,13 @@
 
 ## Installation
 
-The project has been tested under Linux (arch, and arch based Manjaro) and MacOs.
-
-Rust based tooling (Veryl, Surfer) works as expected cross the board of operating systems. (First make sure that you have a work rust tool-chain installed ([Rust](https://www.rust-lang.org/tools/install)), and follow the instructions for installing Veryl and Surfer as above). Marlin is brought in as a library by Veryl, so no separate installation is required.
+Rust based tooling (Veryl, Surfer) works as expected cross the board of operating systems. First make sure that you have a working Rust tool-chain installed ([Rust](https://www.rust-lang.org/tools/install)), and follow the instructions for installing Veryl and Surfer as above. Marlin is brought in as a library by Veryl, so no separate installation is required.
 
 For Verilator, you may use your system's package manager. Under arch based Linux `pacman`, while under MacOs either [Brew](https://brew.sh/) or [Mac Ports](https://www.macports.org/). For better performance you may want to install Verilator from source. This allows to use `ccache`for accelerating incremental builds and `mold`for improved linker performance. Further details are operating system dependent and not covered here.
 
-Cocotb, is implemented in python. Here you have the option to either install in the python package manager, or through the system wide package manager, so it depends on your system installation which way to go, python provides a jungle of opportunities to get lost.
+Cocotb, is implemented in Python. Here you have the option to either install Cocotb using the Python package manager or through the system wide package manager, so it depends on your system installation which way to go (Python provides a jungle of opportunities for you to get lost).
 
-The tests in this repo, exemplifies the various methods to test Veryl modules adopting System Verilog, cocotb and Marlin.
+The tests in this repo, exemplifies the various methods to test Veryl modules adopting System Verilog, Cocotb and Marlin.
 
 ## Veryl Test, Simulation, and View
 
@@ -150,7 +148,6 @@ The VIPS support a subset of the MIPS32 ISA. We can capture the control logic fo
 | addi      |    1    |      0      |   0   |  10   |      1      |     1      |
 | slti      |    1    |      0      |   1   |  11   |      1      |     1      |
 
-
 ![image](images/vips_no_branch.svg)
 
 ## Simple Vips
@@ -206,7 +203,6 @@ The load and store instructions computes the effective address using the Alu (`r
 
 ![image](images/vips_full.svg)
 
-
 ## List of current tests
 
 For now using the explicit syntax for declaring dependencies.
@@ -228,11 +224,9 @@ veryl test src/arith_test.veryl src/arith.veryl src/full_adder.veryl --wave
 veryl test src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
 veryl test src/alu4.veryl src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
 veryl test src/alu32.veryl src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl --wave
-# top level Vips1
-veryl test src/alu.veryl src/vips1.veryl src/mux2.veryl src/extend16to32.veryl src/regfile.veryl src/decoder1.veryl src/instr_mem.veryl src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl --wave
-# top level Vips
-veryl test src/alu.veryl src/vips.veryl src/mux2.veryl src/extend16to32.veryl src/regfile.veryl src/decoder.veryl src/instr_mem.veryl src/pc_plus4.veryl src/adder.veryl src/full_adder.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl --wave
+# top level Vips1 (correspondinging to Simple Vips)
+veryl test src/vips1.veryl src/alu.veryl src/mux4.veryl src/zero_extend.veryl src/arith.veryl src/full_adder.veryl src/mux2.veryl src/extend16to32.veryl src/regfile.veryl src/decoder1.veryl src/instr_mem1.veryl src/pc_plus4.veryl src/adder.veryl --wave
+# top level Vips (corresponding to Full Vips)
+ veryl test src/vips.veryl src/pc.veryl src/adder.veryl src/mux4.veryl src/instr_mem.veryl src/decoder.veryl src/mux2.veryl src/regfile.veryl src/branch.veryl src/extend16to32.veryl src/alu.veryl src/data_memory.veryl src/full_adder.veryl src/arith.veryl src/zero_extend.veryl --wave
 
 ```
-
-
