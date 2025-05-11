@@ -42,7 +42,9 @@ Once this work, Drag `TOP/test` to the view pane, and you should get:
 
 ## Marlin Test
 
-This allows us to use the Rust built in test framework. The module under test is represented by a struct which fields correspond to the module "interface".
+This allos us to reap the benefits of the Rust built in test framework. For convenience we recommend that you install `rust-analyzer` and optional quality of life vscode plugins (e.g., `better toml` and `dependi`).
+
+The module under test is represented by a struct which fields correspond to the module "interface".
 
 ```sv
 // src/alu32.veryl
@@ -91,7 +93,6 @@ fn test_alu() -> Result<(), Whatever> {
 To run tests and capture the output:
 
 ```shell
-veryl build
 cargo test -- --nocapture
 ```
 
