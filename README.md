@@ -175,6 +175,8 @@ The branch target for the relative branches (`beq` and `bne`) is computed by a s
 Notice, for generating the `pc_sel` signal we need to take into accunt the `eq` input (`a_data` == `b_data`).
 The `jr` instruction assumes the `rt` field to be `zero` and adds that (0) to the `rs` field. The real MIPS has a special ALU opcode for just passing the `rs` field, so here we break a bit with the MIPS specification.
 
+The corresponding implementation is found in `src/decoder1.veryl`. A test program is found in `src/instr_mem1.veryl` allong with the top level `src/vips1.veryl`. See List of current tests, for running the model.
+
 ![image](images/vips_simple.svg)
 
 ## Full Vips
@@ -200,6 +202,8 @@ The Full Vips adds support for word sized access to data memory.
 | sw        |    0    |      0      |   0   |  10   |      1      |     1      |    00    |    x    |
 
 The load and store instructions computes the effective address using the Alu (`rs` + sig_ext(`imm`)). The data to store comes from the `rt` field (`b_data`).
+
+The corresponding implementation is found in `src/decoder.veryl`. A test program is found in `src/instr_mem.veryl` allong with the top level `src/vips1.veryl`. See List of current tests, for running the model.
 
 ![image](images/vips_full.svg)
 
