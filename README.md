@@ -153,7 +153,10 @@ The VIPS support a subset of the MIPS32 ISA. We can capture the control logic fo
 
 ## Simple Vips
 
-Adding control logic for branches.
+Adding control logic for branches. The decoder/control unit implements the following logic.
+
+Notice (*), for `beq` the `pc_sel` is `eq ? 10 : 00`, `bne` the `pc_sel` is `eq ? 00 : 10`, respectively.
+The *z* signal is not used.
 
 | Operation | `rf_we` | `w_reg_sel` | `sub` | `op`  | `alu_b_sel` | `sign_ext` | `pc_sel` |
 | --------- | :-----: | :---------: | :---: | :---: | :---------: | :--------: | :------: |
@@ -167,13 +170,14 @@ Adding control logic for branches.
 | addi      |    1    |      0      |   0   |  10   |      1      |     1      |    00    |
 | slti      |    1    |      0      |   1   |  11   |      1      |     1      |    00    |
 | jr        |    0    |      0      |   0   |  10   |      0      |     x      |    01    |
-| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |
-| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |
+| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |   (*)    |
+| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |   (*)    |
 | j         |    0    |      0      |   x   |  xx   |      x      |     1      |    11    |
 
 The branch target for the relative branches (`beq` and `bne`) is computed by a seprate adder (not by the Alu). This decision allows the Alu to compute return address for function calls in the real MIPS.
 
-Notice, for generating the `pc_sel` signal we need to take into accunt the `eq` input (`a_data` == `b_data`).
+Notice, for generating the `pc_sel` signal we need to take into accunt the *eq* input (`a_data` == `b_data`).
+
 The `jr` instruction assumes the `rt` field to be `zero` and adds that (0) to the `rs` field. The real MIPS has a special ALU opcode for just passing the `rs` field, so here we break a bit with the MIPS specification.
 
 The corresponding implementation is found in `src/decoder1.veryl`. A test program is found in `src/instr_mem1.veryl` allong with the top level `src/vips1.veryl`. See List of current tests, for running the model.
@@ -182,7 +186,10 @@ The corresponding implementation is found in `src/decoder1.veryl`. A test progra
 
 ## Full Vips
 
-The Full Vips adds support for word sized access to data memory.
+The Full Vips adds support for word sized access to data memory. The decoder/control unit implements the following logic.
+
+Notice (*), for `beq` the `pc_sel` is `eq ? 10 : 00`, `bne` the `pc_sel` is `eq ? 00 : 10`, respectively.
+The *z* signal is not used.
 
 | Operation | `rf_we` | `w_reg_sel` | `sub` | `op`  | `alu_b_sel` | `sign_ext` | `pc_sel` | `d_sel` |
 | --------- | :-----: | :---------: | :---: | :---: | :---------: | :--------: | :------: | :-----: |
@@ -196,11 +203,12 @@ The Full Vips adds support for word sized access to data memory.
 | addi      |    1    |      0      |   0   |  10   |      1      |     1      |    00    |    0    |
 | slti      |    1    |      0      |   1   |  11   |      1      |     1      |    00    |    0    |
 | jr        |    0    |      0      |   0   |  10   |      0      |     x      |    01    |    x    |
-| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |    x    |
-| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |    10    |    x    |
+| beq       |    0    |      0      |   x   |  xx   |      x      |     1      |   (*)    |    x    |
+| bne       |    0    |      0      |   x   |  xx   |      x      |     1      |   (*)    |    x    |
 | j         |    0    |      0      |   x   |  xx   |      x      |     x      |    11    |    x    |
 | lw        |    1    |      0      |   0   |  10   |      1      |     1      |    00    |    1    |
 | sw        |    0    |      0      |   0   |  10   |      1      |     1      |    00    |    x    |
+
 
 The load and store instructions computes the effective address using the Alu (`rs` + sig_ext(`imm`)). The data to store comes from the `rt` field (`b_data`).
 
